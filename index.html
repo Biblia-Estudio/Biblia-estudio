@@ -87,10 +87,10 @@
             display: block;
         }
 
-        /* Vista de Inicio / Menú Principal */
+        /* Vista de Inicio / Menú Principal sin recuadros molestos */
         .hero {
             text-align: center;
-            padding: 40px 0 20px 0;
+            padding: 20px 0 10px 0;
         }
 
         .hero h1 {
@@ -104,41 +104,13 @@
             font-size: 1.1rem;
         }
 
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .card {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-
-        .card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-            border-color: var(--accent-color);
-        }
-
-        .card h3 {
-            margin-top: 0;
-            color: var(--accent-color);
-        }
-
-        /* Apartado Sobre el Proyecto */
+        /* Apartado Sobre el Proyecto limpio y sin tarjetas estorbosas */
         .about-section {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
-            padding: 25px;
+            padding: 30px;
             border-radius: 6px;
-            margin-top: 40px;
+            margin-top: 30px;
         }
 
         .about-section h2 {
@@ -148,7 +120,7 @@
         }
 
         .feedback-form {
-            margin-top: 15px;
+            margin-top: 20px;
             display: flex;
             flex-direction: column;
             gap: 10px;
@@ -156,7 +128,7 @@
 
         .feedback-form textarea {
             width: 100%;
-            height: 80px;
+            height: 90px;
             padding: 10px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
@@ -209,7 +181,7 @@
             font-weight: bold;
         }
 
-        /* Triángulo interactivo limpio (sin textos adicionales) */
+        /* Triángulo interactivo limpio (solito, sin textos al lado) */
         .interactive-triangle {
             display: inline-block;
             font-size: 0.75rem;
@@ -262,7 +234,7 @@
     <header>
         <div class="nav-controls">
             <button class="nav-btn" onclick="switchView('home-view')">🏠 Inicio</button>
-            <select id="book-select" onchange="changeBook()">
+            <select id="book-select" onchange="changeBookFromSelect()">
                 <option value="genesis">Génesis</option>
                 <option value="juan">Juan</option>
             </select>
@@ -277,31 +249,16 @@
     </header>
 
     <main>
-        <!-- 1. VISTA DE INICIO / MENÚ PRINCIPAL -->
+        <!-- 1. VISTA DE INICIO / MENÚ PRINCIPAL (Sin recuadros estorbosos) -->
         <div id="home-view" class="view active">
             <div class="hero">
                 <h1>Biblia de Estudio</h1>
                 <p>Plataforma independiente para profundizar en la lectura y comprensión de las Escrituras.</p>
             </div>
 
-            <div class="cards-grid">
-                <div class="card" onclick="switchView('reading-view')">
-                    <h3>📖 Lectura Bíblica</h3>
-                    <p>Acceso directo al Antiguo y Nuevo Testamento con navegación fluida.</p>
-                </div>
-                <div class="card" onclick="focusSearch()">
-                    <h3>🔍 Buscador Inteligente</h3>
-                    <p>Encuentra palabras clave, temas y conceptos en toda la Biblia.</p>
-                </div>
-                <div class="card" onclick="alert('Sección de conexiones y notas en constante actualización.')">
-                    <h3>🔗 Conexiones y Estudio</h3>
-                    <p>Relaciones entre textos, profecías y estudios complementarios.</p>
-                </div>
-            </div>
-
             <div class="about-section">
                 <h2>Sobre este proyecto</h2>
-                <p>¡Hola! Somos un grupo de personas independientes y sin fines de lucro que busca ayudar a los lectores a comprender mejor la Biblia, su significado profundo, las conexiones que tiene entre sus libros y más. Esta es una plataforma abierta que estará en constante evolución, con actualizaciones semanales para seguir agregando más información y herramientas de estudio. Si encuentras algún detalle por corregir o tienes alguna idea, por favor háznoslo saber para poder mejorar cada día; estaremos muy atentos a sugerencias o errores de la página.</p>
+                <p>¡Hola! Somos un grupo de personas independientes y sin fines de lucro que busca ayudar a los lectores a comprender mejor la Biblia, su significado profundo, las conexiones que tiene entre sus libros y mucho más. Esta es una plataforma abierta que estará en constante evolución, con actualizaciones semanales para seguir agregando más información y herramientas de estudio. Si encuentras algún detalle por corregir o tienes alguna idea, por favor háznoslo saber para poder mejorar cada día; estaremos muy atentos a sugerencias o errores de la página.</p>
                 
                 <div class="feedback-form">
                     <textarea id="user-feedback" placeholder="Escribe aquí tu sugerencia o reporte de error de forma anónima..."></textarea>
@@ -323,13 +280,12 @@
         <div id="search-view" class="view">
             <h2>Resultados de Búsqueda</h2>
             <div id="search-results-container">
-                <p>Escribe en la barra superior para buscar versículos o conceptos clave (ej. amor, fe, luz, creacion)...</p>
+                <p>Escribe en la barra superior para buscar versículos o conceptos clave...</p>
             </div>
         </div>
     </main>
 
     <script>
-        // Base de datos de ejemplo ampliada para lectura y buscador inteligente
         const bibleData = {
             genesis: {
                 name: "Génesis",
@@ -362,7 +318,6 @@
             }
         };
 
-        // Diccionario de sinónimos y conceptos clave para el buscador inteligente
         const synonymsMap = {
             "amor": ["misericordia", "gracia", "bondad", "caridad"],
             "perdon": ["reconciliación", "expiación", "misericordia"],
@@ -372,18 +327,12 @@
             "espiritu": ["aliento", "vida", "fuerza"]
         };
 
-        // Función para cambiar de vista en la interfaz
         function switchView(viewId) {
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById(viewId).classList.add('active');
             window.scrollTo(0, 0);
         }
 
-        function focusSearch() {
-            document.getElementById('global-search').focus();
-        }
-
-        // Cargar capítulo actual
         function renderChapter() {
             const bookKey = document.getElementById('book-select').value;
             const chapterNum = document.getElementById('chapter-select').value;
@@ -399,14 +348,14 @@
                     <div class="verse">
                         <span class="verse-number">${v.num}</span>
                         <span>${v.text}</span>
-                        <span class="interactive-triangle" title="Opciones" onclick="alert('Opción interactiva del versículo')">▶</span>
+                        <span class="interactive-triangle" title="Opción" onclick="alert('Opción del versículo')">▶</span>
                     </div>
                 `;
             });
             document.getElementById('verses-container').innerHTML = html;
         }
 
-        function changeBook() {
+        function changeBookFromSelect() {
             const bookKey = document.getElementById('book-select').value;
             const book = bibleData[bookKey];
             const chapterSelect = document.getElementById('chapter-select');
@@ -416,18 +365,18 @@
                 chapterSelect.innerHTML += `<option value="${ch}">Capítulo ${ch}</option>`;
             }
             renderChapter();
+            switchView('reading-view'); // Salta directo a lectura al cambiar de libro
         }
 
         function changeChapter() {
             renderChapter();
+            switchView('reading-view');
         }
 
-        // Normalizar texto para ignorar acentos y mayúsculas
         function normalizeText(str) {
             return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
         }
 
-        // Buscador Inteligente en Tiempo Real
         function handleSearch(query) {
             const cleanQuery = normalizeText(query.trim());
             
@@ -435,12 +384,10 @@
                 return;
             }
 
-            // Cambiar a vista de resultados si hay texto
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
             document.getElementById('search-view').classList.add('active');
 
             let searchTerms = [cleanQuery];
-            // Verificar sinónimos
             if (synonymsMap[cleanQuery]) {
                 searchTerms = searchTerms.concat(synonymsMap[cleanQuery]);
             }
@@ -470,7 +417,7 @@
             }
 
             if (matchCount === 0) {
-                resultsHtml += `<p>No se encontraron versículos coincidentes con "${query}". Intenta con otra palabra clave como luz, principio, fe o amor.</p>`;
+                resultsHtml += `<p>No se encontraron versículos coincidentes con "${query}".</p>`;
             }
 
             document.getElementById('search-results-container').innerHTML = resultsHtml;
@@ -478,24 +425,22 @@
 
         function goToVerse(bookKey, chapterNum) {
             document.getElementById('book-select').value = bookKey;
-            changeBook();
+            changeBookFromSelect();
             document.getElementById('chapter-select').value = chapterNum;
             renderChapter();
             switchView('reading-view');
         }
 
-        // Enviar sugerencia anónima simulada
         function sendFeedback() {
             const feedbackText = document.getElementById('user-feedback').value;
             if (feedbackText.trim() === "") {
                 alert("Por favor escribe una sugerencia antes de enviar.");
                 return;
             }
-            alert("¡Muchas gracias! Tu sugerencia anónima ha sido registrada para ayudarnos a mejorar.");
+            alert("¡Muchas gracias! Tu sugerencia anónima ha sido registrada.");
             document.getElementById('user-feedback').value = "";
         }
 
-        // Inicializar al cargar
         window.onload = function() {
             renderChapter();
         };
