@@ -87,7 +87,7 @@
             display: block;
         }
 
-        /* Vista de Inicio / Menú Principal sin recuadros molestos */
+        /* Vista de Inicio / Menú Principal */
         .hero {
             text-align: center;
             padding: 20px 0 10px 0;
@@ -104,7 +104,7 @@
             font-size: 1.1rem;
         }
 
-        /* Apartado Sobre el Proyecto limpio y sin tarjetas estorbosas */
+        /* Apartado Sobre el Proyecto */
         .about-section {
             background-color: var(--card-bg);
             border: 1px solid var(--border-color);
@@ -181,7 +181,7 @@
             font-weight: bold;
         }
 
-        /* Triángulo interactivo limpio (solito, sin textos al lado) */
+        /* Triángulo interactivo limpio */
         .interactive-triangle {
             display: inline-block;
             font-size: 0.75rem;
@@ -235,12 +235,40 @@
         <div class="nav-controls">
             <button class="nav-btn" onclick="switchView('home-view')">🏠 Inicio</button>
             <select id="book-select" onchange="changeBookFromSelect()">
-                <option value="genesis">Génesis</option>
-                <option value="juan">Juan</option>
+                <!-- Antiguo Testamento -->
+                <optgroup label="Antiguo Testamento">
+                    <option value="genesis">Génesis</option>
+                    <option value="exodo">Éxodo</option>
+                    <option value="levitico">Levítico</option>
+                    <option value="numeros">Números</option>
+                    <option value="deuteronomio">Deuteronomio</option>
+                    <option value="josue">Josué</option>
+                    <option value="jueces">Jueces</option>
+                    <option value="rut">Rut</option>
+                    <option value="1samuel">1 Samuel</option>
+                    <option value="2samuel">2 Samuel</option>
+                    <option value="salmos">Salmos</option>
+                    <option value="proverbios">Proverbios</option>
+                    <option value="isaias">Isaías</option>
+                    <option value="jeremias">Jeremías</option>
+                </optgroup>
+                <!-- Nuevo Testamento -->
+                <optgroup label="Nuevo Testamento">
+                    <option value="mateo">Mateo</option>
+                    <option value="marcos">Marcos</option>
+                    <option value="lucas">Lucas</option>
+                    <option value="juan">Juan</option>
+                    <option value="hechos">Hechos</option>
+                    <option value="romanos">Romanos</option>
+                    <option value="1corintios">1 Corintios</option>
+                    <option value="2corintios">2 Corintios</option>
+                    <option value="galatas">Gálatas</option>
+                    <option value="efesios">Efesios</option>
+                    <option value="apocalipsis">Apocalipsis</option>
+                </optgroup>
             </select>
             <select id="chapter-select" onchange="changeChapter()">
                 <option value="1">Capítulo 1</option>
-                <option value="2">Capítulo 2</option>
             </select>
         </div>
         <div>
@@ -249,7 +277,7 @@
     </header>
 
     <main>
-        <!-- 1. VISTA DE INICIO / MENÚ PRINCIPAL (Sin recuadros estorbosos) -->
+        <!-- 1. VISTA DE INICIO / MENÚ PRINCIPAL -->
         <div id="home-view" class="view active">
             <div class="hero">
                 <h1>Biblia de Estudio</h1>
@@ -287,35 +315,31 @@
 
     <script>
         const bibleData = {
-            genesis: {
-                name: "Génesis",
-                testament: "Antiguo Testamento",
-                chapters: {
-                    1: [
-                        { num: 1, text: "En el principio, Dios creó los cielos y la tierra." },
-                        { num: 2, text: "La tierra estaba sin forma y vacía. Las tinieblas cubrían la superficie del abismo y el Espíritu de Dios se cernía sobre la superficie de las aguas." },
-                        { num: 3, text: "Dios dijo: «Hágase la luz», y la luz se hizo." },
-                        { num: 4, text: "Dios vio que la luz era buena y separó Dios la luz de las tinieblas." },
-                        { num: 5, text: "Dios llamó a la luz «días», y a las tinieblas las llamó «noche». Y hubo tarde y hubo mañana: el primer día." }
-                    ],
-                    2: [
-                        { num: 1, text: "Fueron terminados los cielos y la tierra, y todo el ejército de ellos." },
-                        { num: 2, text: "Y acabó Dios en el día séptimo la obra que hizo; y reposó el día séptimo de toda la obra que hizo." }
-                    ]
-                }
-            },
-            juan: {
-                name: "Juan",
-                testament: "Nuevo Testamento",
-                chapters: {
-                    1: [
-                        { num: 1, text: "En el principio era el Verbo, y el Verbo era con Dios, y el Verbo era Dios." },
-                        { num: 2, text: "Este era en el principio con Dios." },
-                        { num: 3, text: "Todas las cosas por él fueron hechas, y sin él nada de lo que ha sido hecho fue hecho." },
-                        { num: 4, text: "En él estaba la vida, y la vida era la luz de los hombres." }
-                    ]
-                }
-            }
+            genesis: { name: "Génesis", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "En el principio, Dios creó los cielos y la tierra." }, { num: 2, text: "La tierra estaba sin forma y vacía. Las tinieblas cubrían la superficie del abismo y el Espíritu de Dios se cernía sobre la superficie de las aguas." }, { num: 3, text: "Dios dijo: «Hágase la luz», y la luz se hizo." }], 2: [{ num: 1, text: "Fueron terminados los cielos y la tierra, y todo el ejército de ellos." }] } },
+            exodo: { name: "Éxodo", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Estos son los nombres de los hijos de Israel que entraron en Egipto con Jacob..." }] } },
+            levitico: { name: "Levítico", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Y llamó Jehová a Moisés, y habló con él desde el tabernáculo de reunión..." }] } },
+            numeros: { name: "Números", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Habló Jehová a Moisés en el desierto de Sinaí, en el tabernáculo de reunión..." }] } },
+            deuteronomio: { name: "Deuteronomio", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Estas son las palabras que habló Moisés a todo Israel al otro lado del Jordán..." }] } },
+            josue: { name: "Josué", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Aconteció después de la muerte de Moisés siervo de Jehová, que Jehová habló a Josué hijo de Nun..." }] } },
+            jueces: { name: "Jueces", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Después de la muerte de Josué, los hijos de Israel consultaron a Jehová..." }] } },
+            rut: { name: "Rut", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Aconteció en los días en que gobernaban los jueces, que hubo hambre en la tierra..." }] } },
+            "1samuel": { name: "1 Samuel", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Hubo un varón de Ramataim de Zofim, del monte de Efraín, que se llamaba Elcana..." }] } },
+            "2samuel": { name: "2 Samuel", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Aconteció después de la muerte de Saúl,, habiendo vuelto David de la derrota de los amalecitas..." }] } },
+            salmos: { name: "Salmos", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Bienaventurado el varón que no anduvo en consejo de malos, ni estuvo en camino de pecadores..." }, { num: 2, text: "¿Por qué se amotinan las gentes, y los pueblos meditan cosas vanas?" }] } },
+            proverbios: { name: "Proverbios", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Los proverbios de Salomón, hijo de David, rey de Israel." }] } },
+            isaias: { name: "Isaías", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Visión de Isaías hijo de Amoz, la cual vio acerca de Judá y Jerusalén en días de Uzías..." }] } },
+            jeremias: { name: "Jeremías", testament: "Antiguo Testamento", chapters: { 1: [{ num: 1, text: "Las palabras de Jeremías hijo de Hilcías, de los sacerdotes que estuvieron en Anatot..." }] } },
+            mateo: { name: "Mateo", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "Libro de la genealogía de Jesucristo, hijo de David, hijo de Abraham." }] } },
+            marcos: { name: "Marcos", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "Principio del evangelio de Jesucristo, Hijo de Dios." }] } },
+            lucas: { name: "Lucas", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "Puesto que ya muchos han tratado de poner en orden la historia de las cosas que entre nosotros han sido ciertísimas..." }] } },
+            juan: { name: "Juan", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "En el principio era el Verbo, y el Verbo era con Dios, y el Verbo era Dios." }, { num: 2: [{ num: 1, text: "Este era en el principio con Dios." }] }] } },
+            hechos: { name: "Hechos", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "En el primer tratado, oh Teófilo, hablé acerca de todas las cosas que Jesús comenzó a hacer y a enseñar..." }] } },
+            romanos: { name: "Romanos", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "Pablo, siervo de Jesucristo, llamado a ser apóstol, apartado para el evangelio de Dios..." }] } },
+            "1corintios": { name: "1 Corintios", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "Pablo, llamado a ser apóstol de Jesucristo por la voluntad de Dios, y el hermano Sostenes..." }] } },
+            "2corintios": { name: "2 Corintios", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "Pablo, apóstol de Jesucristo por la voluntad de Dios, y el hermano Timoteo, a la iglesia de Dios..." }] } },
+            galatas: { name: "Gálatas", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "Pablo, apóstol (no de hombres ni por hombre, sino por Jesucristo y por Dios el Padre que le resucitó de los muertos)..." }] } },
+            efesios: { name: "Efesios", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "Pablo, apóstol de Jesucristo por la voluntad de Dios, a los santos y fieles en Cristo Jesús que están en Éfeso." }] } },
+            apocalipsis: { name: "Apocalipsis", testament: "Nuevo Testamento", chapters: { 1: [{ num: 1, text: "La revelación de Jesucristo, que Dios le dio, para manifestar a sus siervos las cosas que deben suceder pronto..." }] } }
         };
 
         const synonymsMap = {
@@ -355,7 +379,7 @@
             document.getElementById('verses-container').innerHTML = html;
         }
 
-        function changeBookFromSelect() {
+        function updateChapters() {
             const bookKey = document.getElementById('book-select').value;
             const book = bibleData[bookKey];
             const chapterSelect = document.getElementById('chapter-select');
@@ -364,8 +388,12 @@
             for (let ch in book.chapters) {
                 chapterSelect.innerHTML += `<option value="${ch}">Capítulo ${ch}</option>`;
             }
+        }
+
+        function changeBookFromSelect() {
+            updateChapters();
             renderChapter();
-            switchView('reading-view'); // Salta directo a lectura al cambiar de libro
+            switchView('reading-view');
         }
 
         function changeChapter() {
@@ -425,7 +453,7 @@
 
         function goToVerse(bookKey, chapterNum) {
             document.getElementById('book-select').value = bookKey;
-            changeBookFromSelect();
+            updateChapters();
             document.getElementById('chapter-select').value = chapterNum;
             renderChapter();
             switchView('reading-view');
@@ -442,6 +470,7 @@
         }
 
         window.onload = function() {
+            updateChapters();
             renderChapter();
         };
     </script>
