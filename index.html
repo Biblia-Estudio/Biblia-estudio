@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Biblia de Estudio — Antiguo y Nuevo Testamento</title>
+  <style>
+    :root { --bg: #fdfbf7; --txt: #1f2937; --panel: #f3f0e6; --borde: #d6d1c4; --resalte: #fef08a; }
+    body { font-family: Georgia, serif; background: var(--bg); color: var(--txt); margin: 0; line-height: 1.75; }
+    header { position: sticky; top: 0; background: #fff; border-bottom: 1px solid var(--borde); padding: 12px 16px; z-index: 100; font-family: system-ui, sans-serif; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+    .controles { max-width: 820px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    select, input { padding: 9px 12px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.95rem; background: var(--bg); }
+    input[type="search"] { flex: 1; min-width: 210px; background: #fff; }
+    main { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
+    .testamento-badge { display: inline-block; font-family: system-ui, sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; background: #e5e0d0; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px; font-weight: 700; }
+    .capitulo { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 2px solid var(--borde); }
+    .versiculo { margin: 6px 0; padding: 2px 6px; border-radius: 4px; }
+    .versiculo.destacado { background: var(--resalte); }
+    .num { font-weight: bold; font-size: 0.78rem; color: #6b7280; vertical-align: super; margin-right: 5px; font-family: system-ui, sans-serif; }
+    details.estudio { margin-top: 22px; background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; font-family: system-ui, sans-serif; overflow: hidden; }
+    summary { list-style: none; cursor: pointer; padding: 14px; text-align: center; background: #ece7d9; font-weight: 600; user-select: none; }
+    summary::-webkit-details-marker { display: none; }
+    .flecha { display: block; font-size: 1.25rem; margin-top: 4px; transition: transform 0.25s; }
+    details[open] .flecha { transform: rotate(180deg); }
+    .estudio-cuerpo { padding: 18px; border-top: 1px solid var(--borde); font-size: 0.96rem; line-height: 1.65; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="controles">
+    <select id="sel-libro" onchange="cambiarLibro(this.value)"></select>
+    <select id="sel-cap" onchange="irACapitulo(this.value)">
+      <option value="">Ir al capítulo...</option>
+    </select>
+    <input type="search" id="buscador" placeholder="Buscar versículo o palabra en este libro..." oninput="filtrarTexto(this.value)">
+  </div>
+</header>
+
+<main id="lector"></main>
+
+<script>
+  // Catálogo oficial ordenado de los 66 libros divididos por Testamento
+  const CATALOGO = {
+    "Antiguo Testamento": [
+      ["GEN","Génesis"],["EXO","Éxodo"],["LEV","Levítico"],["NUM","Números"],["DEU","Deuteronomio"],
+      ["JOS","Josué"],["JDG","Jueces"],["RUT","Rut"],["1SA","1 Samuel"],["2SA","2 Samuel"],
+      ["1KI","1 Reyes"],["2KI","2 Reyes"],["1CH","1 Crónicas"],["2CH","2 Crónicas"],["EZR","Esdras"],
+      ["NEH","Nehemías"],["EST","Ester"],["JOB","Job"],["PSA","Salmos"],["PRO","Proverbios"],
+      ["ECC","Eclesiastés"],["SNG","Cantares"],["ISA","Isaías"],["JER","Jeremías"],["LAM","Lamentaciones"],
+      ["EZK","Ezequiel"],["DAN","Daniel"],["HOS","Oseas"],["JOL","Joel"],["AMO","Amós"],
+      ["OBA","Abdías"],["JON","Jonás"],["MIC","Miqueas"],["NAM","Nahúm"],["HAB","Habacuc"],
+      ["ZEP","Sofonías"],["HAG","Hageo"],["ZEC","Zacarías"],["MAL","Malaquías"]
+    ],
+    "Nuevo Testamento": [
+      ["MAT","San Mateo"],["MRK","San Marcos"],["LUK","San Lucas"],["JHN","San Juan"],["ACT","Hechos"],
+      ["ROM","Romanos"],["1CO","1 Corintios"],["2CO","2 Corintios"],["GAL","Gálatas"],["EPH","Efesios"],
+      ["PHP","Filipenses"],["COL","Colosenses"],["1TH","1 Tesalonicenses"],["2TH","2 Tesalonicenses"],["1TI","1 Timoteo"],
+      ["2TI","2 Timoteo"],["TIT","Tito"],["PHM","Filemón"],["HEB","Hebreos"],["JAS","Santiago"],
+      ["1PE","1 Pedro"],["2PE","2 Pedro"],["1JN","1 Juan"],["2JN","2 Juan"],["3JN","3 Juan"],
+      ["JUD","San Judas"],["REV","Apocalipsis"]
+    ]
+  };
+
+  // Construir el selector dividido por Antiguo y Nuevo Testamento
+  const selLibro = document.getElementById('sel-libro');
+  Object.entries(CATALOGO).forEach(([testamento, libros]) => {
+    const grupo = document.createElement('optgroup');
+    grupo.label = testamento;
+    libros.forEach(([codigo, nombre]) => {
+      const opt = document.createElement('option');
+      opt.value = `${testamento === 'Antiguo Testamento' ? 'antiguo_testamento' : 'nuevo_testamento'}/${codigo}`;
+      opt.textContent = nombre;
+      grupo.appendChild(opt);
+    });
+    selLibro.appendChild(grupo);
+  });
+
+  async function cambiarLibro(ruta) {
+    const contenedor = document.getElementById('lector');
+    const selCap = document.getElementById('sel-cap');
+    contenedor.innerHTML = '<p>Cargando libro...</p>';
+    selCap.innerHTML = '<option value="">Ir al capítulo...</option>';
+
+    try {
+      const resp = await fetch(`${ruta}.json`);
+      if (!resp.ok) throw new Error('Aún no subido');
+      const datos = await resp.json();
+      renderizarLibro(datos);
+    } catch (e) {
+      contenedor.innerHTML = `<p>Para ver este libro, sube el archivo <strong>${ruta}.json</strong> a tu repositorio.</p>`;
+    }
+  }
+
+  function renderizarLibro(libro) {
+    const contenedor = document.getElementById('lector');
+    const selCap = document.getElementById('sel-cap');
+    contenedor.innerHTML = `<span class="testamento-badge">${libro.testamento}</span>`;
+
+    Object.entries(libro.capitulos).forEach(([numCap, versiculos]) => {
+      selCap.innerHTML += `<option value="cap-${numCap}">Capítulo ${numCap}</option>`;
+      const est = (libro.estudios && libro.estudios[numCap]) || {
+        historia: "Espacio listo para agregar el contexto histórico de este capítulo.",
+        original: "Espacio listo para agregar el análisis en hebreo o griego.",
+        ensenanza: "Espacio listo para agregar la enseñanza central."
+      };
+
+      const versHtml = versiculos.map((t, i) =>
+        `<p class="versiculo"><span class="num">${i + 1}</span>${t}</p>`
+      ).join('');
+
+      contenedor.innerHTML += `
+        <section class="capitulo" id="cap-${numCap}">
+          <h2>${libro.nombre} ${numCap}</h2>
+          ${versHtml}
+          <details class="estudio">
+            <summary>
+              Ver historia, idioma original y enseñanza de ${libro.nombre} ${numCap}
+              <span class="flecha">▼</span>
+            </summary>
+            <div class="estudio-cuerpo">
+              <p><strong>📜 Historia y Contexto:</strong> ${est.historia}</p>
+              <p><strong>🔍 Idioma Original (Hebreo/Griego):</strong> ${est.original}</p>
+              <p><strong>💡 Enseñanza:</strong> ${est.ensenanza}</p>
+            </div>
+          </details>
+        </section>`;
+    });
+  }
+
+  function irACapitulo(idCap) {
+    if (!idCap) return;
+    const el = document.getElementById(idCap);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function filtrarTexto(q) {
+    const texto = q.toLowerCase().trim();
+    document.querySelectorAll('.versiculo').forEach(v => {
+      const coincide = texto.length > 2 && v.textContent.toLowerCase().includes(texto);
+      v.classList.toggle('destacado', coincide);
+    });
+  }
+
+  cambiarLibro('antiguo_testamento/GEN');
+</script>
+</body>
+</html>
