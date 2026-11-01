@@ -312,7 +312,8 @@
     </main>
 
     <script>
-     // Catálogo oficial ordenado de los 66 libros divididos por Testamento
+<script>
+  // Catálogo oficial ordenado de los 66 libros divididos por Testamento
   const CATALOGO = {
     "Antiguo Testamento": [
       ["GEN","Génesis"],["EXO","Éxodo"],["LEV","Levítico"],["NUM","Números"],["DEU","Deuteronomio"],
@@ -333,7 +334,8 @@
       ["JUD","San Judas"],["REV","Apocalipsis"]
     ]
   };
-        // Construir el selector dividido por Antiguo y Nuevo Testamento
+
+  // Construir el selector dividido por Antiguo y Nuevo Testamento
   const selLibro = document.getElementById('sel-libro');
   Object.entries(CATALOGO).forEach(([testamento, libros]) => {
     const grupo = document.createElement('optgroup');
@@ -347,137 +349,73 @@
     selLibro.appendChild(grupo);
   });
 
-        const synonymsMap = {
-            "amor": ["misericordia", "gracia", "bondad", "caridad"],
-            "perdon": ["reconciliación", "expiación", "misericordia"],
-            "fe": ["confianza", "creencia", "fidelidad"],
-            "principio": ["inicio", "creación", "origen"],
-            "luz": ["resplandor", "verdad", "guía"],
-            "espiritu": ["aliento", "vida", "fuerza"]
-        };
+  async function cambiarLibro(ruta) {
+    const contenedor = document.getElementById('lector');
+    const selCap = document.getElementById('sel-cap');
+    contenedor.innerHTML = '<p>Cargando libro...</p>';
+    selCap.innerHTML = '<option value="">Ir al capítulo...</option>';
 
-        function switchView(viewId) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById(viewId).classList.add('active');
-            window.scrollTo(0, 0);
-        }
+    try {
+      const resp = await fetch(`${ruta}.json`);
+      if (!resp.ok) throw new Error('Aún no subido');
+      const datos = await resp.json();
+      renderizarLibro(datos);
+    } catch (e) {
+      contenedor.innerHTML = `<p>Para ver este libro, sube el archivo <strong>${ruta}.json</strong> a tu repositorio.</p>`;
+    }
+  }
 
-        function renderChapter() {
-            const bookKey = document.getElementById('book-select').value;
-            const chapterNum = document.getElementById('chapter-select').value;
-            const book = bibleData[bookKey];
-            const verses = book.chapters[chapterNum] || [];
+  function renderizarLibro(libro) {
+    const contenedor = document.getElementById('lector');
+    const selCap = document.getElementById('sel-cap');
+    contenedor.innerHTML = `<span class="testamento-badge">${libro.testamento}</span>`;
 
-            document.getElementById('testament-badge').innerText = book.testament;
-            document.getElementById('main-chapter-title').innerText = `${book.name} ${chapterNum}`;
+    Object.entries(libro.capitulos).forEach(([numCap, versiculos]) => {
+      selCap.innerHTML += `<option value="cap-${numCap}">Capítulo ${numCap}</option>`;
+      const est = (libro.estudios && libro.estudios[numCap]) || {
+        historia: "Espacio listo para agregar el contexto histórico de este capítulo.",
+        original: "Espacio listo para agregar el análisis en hebreo o griego.",
+        ensenanza: "Espacio listo para agregar la enseñanza central."
+      };
 
-            let html = '';
-            verses.forEach(v => {
-                html += `
-                    <div class="verse">
-                        <span class="verse-number">${v.num}</span>
-                        <span>${v.text}</span>
-                        <span class="interactive-triangle" title="Opción" onclick="alert('Opción del versículo')">▶</span>
-                    </div>
-                `;
-            });
-            document.getElementById('verses-container').innerHTML = html;
-        }
+      const versHtml = versiculos.map((t, i) =>
+        `<p class="versiculo"><span class="num">${i + 1}</span>${t}</p>`
+      ).join('');
 
-        function updateChapters() {
-            const bookKey = document.getElementById('book-select').value;
-            const book = bibleData[bookKey];
-            const chapterSelect = document.getElementById('chapter-select');
-            
-            chapterSelect.innerHTML = '';
-            for (let ch in book.chapters) {
-                chapterSelect.innerHTML += `<option value="${ch}">Capítulo ${ch}</option>`;
-            }
-        }
+      contenedor.innerHTML += `
+        <section class="capitulo" id="cap-${numCap}">
+          <h2>${libro.nombre} ${numCap}</h2>
+          ${versHtml}
+          <details class="estudio">
+            <summary>
+              Ver historia, idioma original y enseñanza de ${libro.nombre} ${numCap}
+              <span class="flecha">▼</span>
+            </summary>
+            <div class="estudio-cuerpo">
+              <p><strong>📜 Historia y Contexto:</strong> ${est.historia}</p>
+              <p><strong>🔍 Idioma Original (Hebreo/Griego):</strong> ${est.original}</p>
+              <p><strong>💡 Enseñanza:</strong> ${est.ensenanza}</p>
+            </div>
+          </details>
+        </section>`;
+    });
+  }
 
-        function changeBookFromSelect() {
-            updateChapters();
-            renderChapter();
-            switchView('reading-view');
-        }
+  function irACapitulo(idCap) {
+    if (!idCap) return;
+    const el = document.getElementById(idCap);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  }
 
-        function changeChapter() {
-            renderChapter();
-            switchView('reading-view');
-        }
+  function filtrarTexto(q) {
+    const texto = q.toLowerCase().trim();
+    document.querySelectorAll('.versiculo').forEach(v => {
+      const coincide = texto.length > 2 && v.textContent.toLowerCase().includes(texto);
+      v.classList.toggle('destacado', coincide);
+    });
+  }
 
-        function normalizeText(str) {
-            return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
-        }
-
-        function handleSearch(query) {
-            const cleanQuery = normalizeText(query.trim());
-            
-            if (cleanQuery.length === 0) {
-                return;
-            }
-
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.getElementById('search-view').classList.add('active');
-
-            let searchTerms = [cleanQuery];
-            if (synonymsMap[cleanQuery]) {
-                searchTerms = searchTerms.concat(synonymsMap[cleanQuery]);
-            }
-
-            let resultsHtml = `<h3>Resultados para: "${query}"</h3>`;
-            let matchCount = 0;
-
-            for (let bKey in bibleData) {
-                let book = bibleData[bKey];
-                for (let chNum in book.chapters) {
-                    let verses = book.chapters[chNum];
-                    verses.forEach(v => {
-                        let normalizedVerse = normalizeText(v.text);
-                        let isMatch = searchTerms.some(term => normalizedVerse.includes(term));
-
-                        if (isMatch) {
-                            matchCount++;
-                            resultsHtml += `
-                                <div class="search-result-item" onclick="goToVerse('${bKey}', '${chNum}')">
-                                    <h4>${book.name} ${chNum}:${v.num}</h4>
-                                    <p>${v.text}</p>
-                                </div>
-                            `;
-                        }
-                    });
-                }
-            }
-
-            if (matchCount === 0) {
-                resultsHtml += `<p>No se encontraron versículos coincidentes con "${query}".</p>`;
-            }
-
-            document.getElementById('search-results-container').innerHTML = resultsHtml;
-        }
-
-        function goToVerse(bookKey, chapterNum) {
-            document.getElementById('book-select').value = bookKey;
-            updateChapters();
-            document.getElementById('chapter-select').value = chapterNum;
-            renderChapter();
-            switchView('reading-view');
-        }
-
-        function sendFeedback() {
-            const feedbackText = document.getElementById('user-feedback').value;
-            if (feedbackText.trim() === "") {
-                alert("Por favor escribe una sugerencia antes de enviar.");
-                return;
-            }
-            alert("¡Muchas gracias! Tu sugerencia anónima ha sido registrada.");
-            document.getElementById('user-feedback').value = "";
-        }
-
-        window.onload = function() {
-            updateChapters();
-            renderChapter();
-        };
-    </script>
+  cambiarLibro('antiguo_testamento/GEN');
+</script>
 </body>
 </html>
