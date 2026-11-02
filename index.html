@@ -70,7 +70,7 @@
 
     /* Contenedor Principal y Vistas */
     main { 
-        max-width: 800px; 
+        max-width: 850px; 
         margin: 20px auto 80px auto; 
         padding: 24px 16px; 
     }
@@ -152,10 +152,80 @@
         cursor: not-allowed;
     }
 
+    /* Estilos de la Guía Temática de Versículos */
+    .guia-buscador {
+        width: 100%;
+        padding: 12px 16px;
+        margin: 16px 0 28px 0;
+        border: 1px solid var(--borde);
+        border-radius: 8px;
+        font-size: 1rem;
+        box-sizing: border-box;
+        font-family: system-ui, sans-serif;
+    }
+
+    .guia-categoria {
+        margin-bottom: 36px;
+        font-family: system-ui, sans-serif;
+    }
+
+    .guia-categoria h2 {
+        color: var(--accent-color);
+        border-bottom: 2px solid var(--borde);
+        padding-bottom: 8px;
+        margin-bottom: 18px;
+        font-size: 1.35rem;
+    }
+
+    .guia-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+    }
+
+    .guia-card {
+        background: var(--card-bg);
+        border: 1px solid var(--borde);
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+
+    .guia-card h3 {
+        margin: 0 0 12px 0;
+        font-size: 1.02rem;
+        color: var(--txt);
+        line-height: 1.35;
+    }
+
+    .citas-lista {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .cita-link {
+        background: var(--panel);
+        border: 1px solid var(--borde);
+        color: var(--accent-color);
+        padding: 4px 10px;
+        border-radius: 14px;
+        font-size: 0.84rem;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s ease;
+    }
+
+    .cita-link:hover {
+        background: var(--accent-color);
+        color: #fff;
+        border-color: var(--accent-color);
+    }
+
     /* Estilos de Lectura de Libros y Capítulos */
     .testamento-badge { display: inline-block; font-family: system-ui, sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; background: #e5e0d0; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px; font-weight: 700; }
     
-    /* scroll-margin-top evita que la barra superior fija tape el título del capítulo al seleccionarlo */
     .capitulo { 
         margin-bottom: 48px; 
         padding-bottom: 28px; 
@@ -163,7 +233,7 @@
         scroll-margin-top: 85px; 
     }
     
-    .versiculo { margin: 6px 0; padding: 2px 6px; border-radius: 4px; text-align: justify; }
+    .versiculo { margin: 6px 0; padding: 4px 8px; border-radius: 4px; text-align: justify; scroll-margin-top: 110px; transition: background 0.3s; }
     .versiculo.destacado { background: var(--resalte); }
     .num { font-weight: bold; font-size: 0.78rem; color: #6b7280; vertical-align: super; margin-right: 5px; font-family: system-ui, sans-serif; }
     
@@ -179,13 +249,17 @@
 <body>
 
 <!-- =================================================================
-     2. BARRA DE NAVEGACIÓN SUPERIOR (SELECCIÓN DE LIBROS Y CAPÍTULOS)
+     2. BARRA DE NAVEGACIÓN SUPERIOR (SELECCIÓN DE LIBROS Y GUÍAS)
      ================================================================= -->
 <header>
   <div class="nav-controls">
     <button class="nav-btn" onclick="irAInicio()">🏠 Inicio</button>
-    <select id="sel-libro" onchange="if(this.value) { switchView('reading-view'); cambiarLibro(this.value); }">
+    <button class="nav-btn" onclick="abrirGuiaTemas()">📖 Versículos de Ayuda</button>
+    <select id="sel-libro" onchange="manejarSeleccionLibro(this.value)">
       <option value="">Selecciona un libro...</option>
+      <optgroup label="Guías y Recursos">
+        <option value="GUIA_TEMAS">📖 Guía de Versículos por Tema</option>
+      </optgroup>
     </select>
     <select id="sel-cap" onchange="if(this.value) { switchView('reading-view'); irACapitulo(this.value); }">
       <option value="">Ir al capítulo...</option>
@@ -206,7 +280,6 @@
           <p>Plataforma independiente para profundizar en la lectura y comprensión de las Escrituras.</p>
       </div>
 
-      <!-- Sección de bienvenida y formulario de sugerencias -->
       <div class="about-section">
           <h2>Sobre este proyecto</h2>
           <p>¡Hola! Somos un grupo de personas independientes y sin fines de lucro que busca ayudar a los lectores a comprender mejor la Biblia, su significado profundo, las conexiones que tiene entre sus libros y mucho más. Esta es una plataforma abierta que estará en constante evolución, con actualizaciones semanales para seguir agregando más información y herramientas de estudio. Si encuentras algún detalle por corregir o tienes alguna idea, por favor háznoslo saber para poder mejorar cada día; estaremos muy atentos a tus sugerencias o reportes de errores de la página.</p>
@@ -228,7 +301,19 @@
   </div>
 
   <!-- =================================================================
-       4. VISTA DE LECTURA DE LIBROS BÍBLICOS
+       4. VISTA DE GUÍA TEMÁTICA DE VERSÍCULOS DE AYUDA
+       ================================================================= -->
+  <div id="help-view" class="view">
+      <div class="hero">
+          <h1>Guía de Versículos por Situación y Tema</h1>
+          <p>Selecciona cualquier referencia bíblica para ir directamente al pasaje y leerlo resaltado.</p>
+      </div>
+      <input type="search" id="filtro-guia" class="guia-buscador" placeholder="Filtrar tema (ej. paz, perdón, familia, trabajo, tristeza, decisiones...)" oninput="filtrarGuiaTemas(this.value)">
+      <div id="contenedor-guia"></div>
+  </div>
+
+  <!-- =================================================================
+       5. VISTA DE LECTURA DE LIBROS BÍBLICOS
        ================================================================= -->
   <div id="reading-view" class="view">
       <div id="lector"></div>
@@ -236,7 +321,7 @@
 </main>
 
 <!-- =================================================================
-     5. LÓGICA DEL SISTEMA: LIBROS, CAPÍTULOS, BUSCADOR Y FORMSPREE
+     6. LÓGICA DEL SISTEMA: LIBROS, GUÍA INTERACTIVA Y FORMSPREE
      ================================================================= -->
 <script>
   // Catálogo oficial ordenado de los 66 libros divididos por Testamento
@@ -261,29 +346,816 @@
     ]
   };
 
-  // Construir el selector dividido por Antiguo y Nuevo Testamento
+  // Mapa rápido de código de libro a su carpeta correspondiente
+  const RUTA_LIBRO = {};
   const selLibro = document.getElementById('sel-libro');
   const selCap = document.getElementById('sel-cap');
 
   Object.entries(CATALOGO).forEach(([testamento, libros]) => {
     const grupo = document.createElement('optgroup');
     grupo.label = testamento;
+    const carpeta = testamento === 'Antiguo Testamento' ? 'antiguo_testamento' : 'nuevo_testamento';
     libros.forEach(([codigo, nombre]) => {
+      RUTA_LIBRO[codigo] = `${carpeta}/${codigo}`;
       const opt = document.createElement('option');
-      opt.value = `${testamento === 'Antiguo Testamento' ? 'antiguo_testamento' : 'nuevo_testamento'}/${codigo}`;
+      opt.value = `${carpeta}/${codigo}`;
       opt.textContent = nombre;
       grupo.appendChild(opt);
     });
     selLibro.appendChild(grupo);
   });
 
-  // Función para alternar entre la pantalla de Inicio y la de Lectura
+  // Base de datos con títulos 100% originales y libres de derechos
+  const GUIA_TEMATICA = [
+    {
+      categoria: "1. Gracia, Reconciliación y Vida Espiritual",
+      temas: [
+        {
+          titulo: "La fractura espiritual de la humanidad ante Dios",
+          citas: [
+            ["Eclesiastés 7:20", "ECC", 7, 20, 20],
+            ["Isaías 59:1-15", "ISA", 59, 1, 15],
+            ["Romanos 3:9-20", "ROM", 3, 9, 20],
+            ["Romanos 5:12-21", "ROM", 5, 12, 21],
+            ["Romanos 7:14-25", "ROM", 7, 14, 25]
+          ]
+        },
+        {
+          titulo: "El anhelo divino de comunión con las personas",
+          citas: [
+            ["Éxodo 19:3-8", "EXO", 19, 3, 8],
+            ["Isaías 54:1-10", "ISA", 54, 1, 10],
+            ["Jeremías 31:31-34", "JER", 31, 31, 34],
+            ["1 Pedro 1:1-10", "1PE", 1, 1, 10],
+            ["1 Juan 3:1-10", "1JN", 3, 1, 10]
+          ]
+        },
+        {
+          titulo: "La revelación cercana de Dios mediante Jesucristo",
+          citas: [
+            ["Juan 3:1-21", "JHN", 3, 1, 21],
+            ["Romanos 5:1-11", "ROM", 5, 1, 11],
+            ["Efesios 2:1-10", "EPH", 2, 1, 10],
+            ["Colosenses 1:15-23", "COL", 1, 15, 23],
+            ["2 Timoteo 1:3-10", "2TI", 1, 3, 10],
+            ["1 Pedro 2:10-25", "1PE", 2, 10, 25]
+          ]
+        },
+        {
+          titulo: "Gracia y redención plena a través de la fe",
+          citas: [
+            ["Salmos 32:1-11", "PSA", 32, 1, 11],
+            ["Salmos 51:1-17", "PSA", 51, 1, 17],
+            ["Romanos 3:21-26", "ROM", 3, 21, 26],
+            ["Romanos 8:31-39", "ROM", 8, 31, 39],
+            ["Romanos 10:5-13", "ROM", 10, 5, 13],
+            ["1 Juan 1:5-10", "1JN", 1, 5, 10]
+          ]
+        },
+        {
+          titulo: "Seguir el ejemplo de Jesús en el vivir diario",
+          citas: [
+            ["Mateo 20:20-28", "MAT", 20, 20, 28],
+            ["Romanos 6:1-14", "ROM", 6, 1, 14],
+            ["Gálatas 5:16-26", "GAL", 5, 16, 26],
+            ["Efesios 4:17-32", "EPH", 4, 17, 32],
+            ["1 Pedro 2:21", "1PE", 2, 21, 21],
+            ["1 Juan 4:7-21", "1JN", 4, 7, 21]
+          ]
+        },
+        {
+          titulo: "Recibir misericordia y restaurar el corazón",
+          citas: [
+            ["Salmos 32:1-5", "PSA", 32, 1, 5],
+            ["Salmos 51:1-19", "PSA", 51, 1, 19],
+            ["Proverbios 28:13", "PRO", 28, 13, 13],
+            ["Joel 2:12-17", "JOL", 2, 12, 17],
+            ["Mateo 6:14-15", "MAT", 6, 14, 15],
+            ["Lucas 15:1-32", "LUK", 15, 1, 32],
+            ["Hebreos 4:14-16", "HEB", 4, 14, 16],
+            ["1 Juan 1:5-10", "1JN", 1, 5, 10]
+          ]
+        },
+        {
+          titulo: "Camino hacia la redención y vida eterna",
+          citas: [
+            ["Juan 3:1-21", "JHN", 3, 1, 21],
+            ["Romanos 1:16-17", "ROM", 1, 16, 17],
+            ["Romanos 3:21-31", "ROM", 3, 21, 31],
+            ["Romanos 5:1-11", "ROM", 5, 1, 11],
+            ["Romanos 10:5-13", "ROM", 10, 5, 13],
+            ["Efesios 1:3-14", "EPH", 1, 3, 14],
+            ["Efesios 2:1-10", "EPH", 2, 1, 10]
+          ]
+        },
+        {
+          titulo: "Comprender nuestro vínculo con el Creador",
+          citas: [
+            ["Deuteronomio 5:1-22", "DEU", 5, 1, 22],
+            ["Salmos 139:1-24", "PSA", 139, 1, 24],
+            ["Juan 15:1-17", "JHN", 15, 1, 17],
+            ["Romanos 5:1-11", "ROM", 5, 1, 11],
+            ["Romanos 8:1-17", "ROM", 8, 1, 17]
+          ]
+        },
+        {
+          titulo: "Búsqueda de la verdad espiritual",
+          citas: [
+            ["Salmos 119:153-160", "PSA", 119, 153, 160],
+            ["Juan 8:31-47", "JHN", 8, 31, 47],
+            ["Juan 14:6-14", "JHN", 14, 6, 14],
+            ["Juan 16:4-15", "JHN", 16, 4, 15],
+            ["1 Timoteo 2:1-7", "1TI", 2, 1, 7]
+          ]
+        },
+        {
+          titulo: "Discernir el propósito de Dios para nuestra vida",
+          citas: [
+            ["Salmos 15:1-5", "PSA", 15, 1, 5],
+            ["Miqueas 6:6-8", "MIC", 6, 6, 8],
+            ["Mateo 5:14-16", "MAT", 5, 14, 16],
+            ["Lucas 9:21-27", "LUK", 9, 21, 27],
+            ["Romanos 13:8-14", "ROM", 13, 8, 14],
+            ["2 Pedro 1:3-9", "2PE", 1, 3, 9],
+            ["1 Juan 4:7-21", "1JN", 4, 7, 21]
+          ]
+        },
+        {
+          titulo: "Poner nuestros talentos al servicio de los demás",
+          citas: [
+            ["Éxodo 35:20-29", "EXO", 35, 20, 29],
+            ["Malaquías 3:6-12", "MAL", 3, 6, 12],
+            ["Lucas 21:1-4", "LUK", 21, 1, 4],
+            ["Hechos 2:43-47", "ACT", 2, 43, 47],
+            ["Hechos 4:32-37", "ACT", 4, 32, 37],
+            ["Romanos 12:9-13", "ROM", 12, 9, 13],
+            ["1 Corintios 16:1-4", "1CO", 16, 1, 4],
+            ["2 Corintios 8:1-15", "2CO", 8, 1, 15],
+            ["2 Corintios 9:6-15", "2CO", 9, 6, 15]
+          ]
+        },
+        {
+          titulo: "Discernimiento frente a enseñanzas engañosas",
+          citas: [
+            ["Mateo 7:15-20", "MAT", 7, 15, 20],
+            ["2 Pedro 2:1-22", "2PE", 2, 1, 22],
+            ["1 Juan 4:1-6", "1JN", 4, 1, 6],
+            ["Judas 1:1-25", "JUD", 1, 1, 25]
+          ]
+        }
+      ]
+    },
+    {
+      categoria: "2. Paz Interior, Emociones y Fortaleza del Ánimo",
+      temas: [
+        {
+          titulo: "Vencer el temor con la confianza puesta en Dios",
+          citas: [
+            ["Salmos 27:1-14", "PSA", 27, 1, 14],
+            ["Salmos 91:1-16", "PSA", 91, 1, 16],
+            ["Isaías 41:5-13", "ISA", 41, 5, 13],
+            ["Marcos 4:35-41", "MRK", 4, 35, 41],
+            ["Hebreos 13:5-6", "HEB", 13, 5, 6],
+            ["1 Juan 4:13-18", "1JN", 4, 13, 18]
+          ]
+        },
+        {
+          titulo: "Esperanza eterna frente al temor a la muerte",
+          citas: [
+            ["Salmos 23:1-6", "PSA", 23, 1, 6],
+            ["Salmos 63:1-8", "PSA", 63, 1, 8],
+            ["Juan 6:35-40", "JHN", 6, 35, 40],
+            ["Romanos 8:18-39", "ROM", 8, 18, 39],
+            ["1 Corintios 15:35-57", "1CO", 15, 35, 57],
+            ["2 Corintios 5:1-10", "2CO", 5, 1, 10],
+            ["2 Timoteo 1:8-10", "2TI", 1, 8, 10]
+          ]
+        },
+        {
+          titulo: "Serenidad y dominio propio frente al enojo",
+          citas: [
+            ["Proverbios 15:1", "PRO", 15, 1, 1],
+            ["Romanos 12:17-21", "ROM", 12, 17, 21],
+            ["Mateo 5:21-24", "MAT", 5, 21, 24],
+            ["Efesios 4:26-32", "EPH", 4, 26, 32],
+            ["Santiago 1:19-21", "JAS", 1, 19, 21]
+          ]
+        },
+        {
+          titulo: "Calma espiritual ante la ansiedad y la inquietud",
+          citas: [
+            ["Salmos 25:1-22", "PSA", 25, 1, 22],
+            ["Mateo 6:25-34", "MAT", 6, 25, 34],
+            ["Mateo 10:26-31", "MAT", 10, 26, 31],
+            ["1 Pedro 1:3-5", "1PE", 1, 3, 5],
+            ["1 Pedro 5:7", "1PE", 5, 7, 7]
+          ]
+        },
+        {
+          titulo: "Consuelo profundo en días de abatimiento y tristeza",
+          citas: [
+            ["Salmos 16:1-11", "PSA", 16, 1, 11],
+            ["Salmos 43:1-5", "PSA", 43, 1, 5],
+            ["Salmos 130:1-8", "PSA", 130, 1, 8],
+            ["Isaías 61:1-4", "ISA", 61, 1, 4],
+            ["Jeremías 15:10-21", "JER", 15, 10, 21],
+            ["Lamentaciones 3:55-57", "LAM", 3, 55, 57],
+            ["Juan 3:14-17", "JHN", 3, 14, 17]
+          ]
+        },
+        {
+          titulo: "Paz cuando nos sentimos defraudados o traicionados",
+          citas: [
+            ["Salmos 55:1-8", "PSA", 55, 1, 8],
+            ["Salmos 62:1-8", "PSA", 62, 1, 8],
+            ["Jeremías 20:7-18", "JER", 20, 7, 18]
+          ]
+        },
+        {
+          titulo: "Renovar el aliento frente al desánimo",
+          citas: [
+            ["Salmos 34:1-22", "PSA", 34, 1, 22],
+            ["Isaías 12:1-6", "ISA", 12, 1, 6],
+            ["Romanos 15:13", "ROM", 15, 13, 13],
+            ["2 Corintios 4:16-18", "2CO", 4, 16, 18],
+            ["Filipenses 4:10-13", "PHP", 4, 10, 13],
+            ["Colosenses 1:9-14", "COL", 1, 9, 14],
+            ["Hebreos 6:9-12", "HEB", 6, 9, 12]
+          ]
+        },
+        {
+          titulo: "Afirmar la fe en momentos de duda espiritual",
+          citas: [
+            ["Salmos 8:1-9", "PSA", 8, 1, 9],
+            ["Salmos 146:1-10", "PSA", 146, 1, 10],
+            ["Proverbios 30:5", "PRO", 30, 5, 5],
+            ["Mateo 7:7-12", "MAT", 7, 7, 12],
+            ["Lucas 17:5-6", "LUK", 17, 5, 6],
+            ["Juan 20:24-31", "JHN", 20, 24, 31],
+            ["Romanos 4:13-25", "ROM", 4, 13, 25],
+            ["1 Juan 5:13-15", "1JN", 5, 13, 15]
+          ]
+        },
+        {
+          titulo: "Sabiduría ante la frustración y los obstáculos",
+          citas: [
+            ["Job 21:1-16", "JOB", 21, 1, 16],
+            ["Job 24:1-17", "JOB", 24, 1, 17],
+            ["Job 36:1-26", "JOB", 36, 1, 26],
+            ["Mateo 7:13-14", "MAT", 7, 13, 14]
+          ]
+        },
+        {
+          titulo: "Cultivar la paciencia y saber esperar en Dios",
+          citas: [
+            ["Salmos 13:1-6", "PSA", 13, 1, 6],
+            ["Salmos 37:1-40", "PSA", 37, 1, 40],
+            ["Eclesiastés 3:1-15", "ECC", 3, 1, 15],
+            ["Lamentaciones 3:25-33", "LAM", 3, 25, 33],
+            ["Hebreos 6:13-20", "HEB", 6, 13, 20],
+            ["Santiago 5:7-11", "JAS", 5, 7, 11]
+          ]
+        },
+        {
+          titulo: "Recordar nuestro valor e identidad en Dios",
+          citas: [
+            ["Deuteronomio 31:1-8", "DEU", 31, 1, 8],
+            ["Salmos 73:21-26", "PSA", 73, 21, 26],
+            ["Salmos 108:1-13", "PSA", 108, 1, 13],
+            ["Filipenses 4:10-20", "PHP", 4, 10, 20],
+            ["1 Juan 3:19-24", "1JN", 3, 19, 24]
+          ]
+        },
+        {
+          titulo: "Superar la envidia y los celos con gratitud",
+          citas: [
+            ["Salmos 49:1-20", "PSA", 49, 1, 20],
+            ["Proverbios 23:17", "PRO", 23, 17, 17],
+            ["Santiago 3:13-18", "JAS", 3, 13, 18]
+          ]
+        },
+        {
+          titulo: "Compañía divina en momentos de soledad",
+          citas: [
+            ["Salmos 22:1-31", "PSA", 22, 1, 31],
+            ["Salmos 42:1-11", "PSA", 42, 1, 11],
+            ["Juan 14:15-31", "JHN", 14, 15, 31],
+            ["1 Corintios 7:25-38", "1CO", 7, 25, 38],
+            ["1 Corintios 12:1-31", "1CO", 12, 1, 31]
+          ]
+        },
+        {
+          titulo: "Templanza del carácter y control de las reacciones",
+          citas: [
+            ["Proverbios 14:17", "PRO", 14, 17, 17],
+            ["Proverbios 14:29", "PRO", 14, 29, 29],
+            ["Proverbios 15:18", "PRO", 15, 18, 18],
+            ["Proverbios 19:11", "PRO", 19, 11, 11],
+            ["Proverbios 29:22", "PRO", 29, 22, 22],
+            ["Eclesiastés 7:9", "ECC", 7, 9, 9],
+            ["Gálatas 5:16-26", "GAL", 5, 16, 26]
+          ]
+        },
+        {
+          titulo: "Prudencia y sabiduría al hablar",
+          citas: [
+            ["Salmos 12:1-8", "PSA", 12, 1, 8],
+            ["Salmos 19:14", "PSA", 19, 14, 14],
+            ["Proverbios 11:13", "PRO", 11, 13, 13],
+            ["Proverbios 26:20", "PRO", 26, 20, 20],
+            ["2 Tesalonicenses 2:16-17", "2TH", 2, 16, 17],
+            ["Santiago 3:1-12", "JAS", 3, 1, 12]
+          ]
+        },
+        {
+          titulo: "Acudir al auxilio de Dios en la necesidad",
+          citas: [
+            ["Salmos 5:1-12", "PSA", 5, 1, 12],
+            ["Salmos 57:1-11", "PSA", 57, 1, 11],
+            ["Salmos 86:1-17", "PSA", 86, 1, 17],
+            ["Salmos 119:169-176", "PSA", 119, 169, 176],
+            ["Salmos 121:1-8", "PSA", 121, 1, 8],
+            ["Salmos 130:1-8", "PSA", 130, 1, 8],
+            ["Mateo 7:7-12", "MAT", 7, 7, 12]
+          ]
+        },
+        {
+          titulo: "Renovar las fuerzas cuando hay agotamiento",
+          citas: [
+            ["Salmos 46:1-11", "PSA", 46, 1, 11],
+            ["Salmos 138:1-8", "PSA", 138, 1, 8],
+            ["Isaías 40:27-31", "ISA", 40, 27, 31],
+            ["Isaías 51:12-16", "ISA", 51, 12, 16],
+            ["Efesios 6:10-20", "EPH", 6, 10, 20],
+            ["2 Tesalonicenses 2:16-17", "2TH", 2, 16, 17]
+          ]
+        },
+        {
+          titulo: "Mirar el porvenir con esperanza y seguridad",
+          citas: [
+            ["Isaías 35:1-10", "ISA", 35, 1, 10],
+            ["Isaías 60:1-22", "ISA", 60, 1, 22],
+            ["Jeremías 29:10-14", "JER", 29, 10, 14],
+            ["1 Pedro 1:3-5", "1PE", 1, 3, 5],
+            ["Apocalipsis 21:1-18", "REV", 21, 1, 18]
+          ]
+        }
+      ]
+    },
+    {
+      categoria: "3. Pruebas Difíciles, Salud y Crisis Vitales",
+      temas: [
+        {
+          titulo: "Fortaleza y esperanza en tiempos de enfermedad",
+          citas: [
+            ["Salmos 23:1-6", "PSA", 23, 1, 6],
+            ["Marcos 1:29-34", "MRK", 1, 29, 34],
+            ["Marcos 6:53-56", "MRK", 6, 53, 56],
+            ["Santiago 5:14-16", "JAS", 5, 14, 16]
+          ]
+        },
+        {
+          titulo: "Consuelo ante la partida de un ser querido",
+          citas: [
+            ["Job 19:25-27", "JOB", 19, 25, 27],
+            ["Juan 11:25-27", "JHN", 11, 25, 27],
+            ["Juan 14:1-7", "JHN", 14, 1, 7],
+            ["Romanos 8:31-39", "ROM", 8, 31, 39],
+            ["Romanos 14:7-9", "ROM", 14, 7, 9],
+            ["1 Tesalonicenses 4:13-18", "1TH", 4, 13, 18]
+          ]
+        },
+        {
+          titulo: "Perseverancia frente al sufrimiento y la hostilidad",
+          citas: [
+            ["Salmos 109:1-31", "PSA", 109, 1, 31],
+            ["Salmos 119:153-160", "PSA", 119, 153, 160],
+            ["Mateo 5:3-12", "MAT", 5, 3, 12],
+            ["Juan 15:18-25", "JHN", 15, 18, 25],
+            ["Juan 16:1-4", "JHN", 16, 1, 4],
+            ["Romanos 8:18-30", "ROM", 8, 18, 30],
+            ["2 Corintios 4:1-15", "2CO", 4, 1, 15],
+            ["Hebreos 12:1-11", "HEB", 12, 1, 11],
+            ["1 Pedro 4:12-19", "1PE", 4, 12, 19]
+          ]
+        },
+        {
+          titulo: "Luz y discernimiento ante decisiones complejas",
+          citas: [
+            ["1 Reyes 3:1-15", "1KI", 3, 1, 15],
+            ["Ester 4:1-17", "EST", 4, 1, 17],
+            ["Salmos 139:1-24", "PSA", 139, 1, 24],
+            ["Daniel 2:14-23", "DAN", 2, 14, 23],
+            ["Colosenses 3:12-17", "COL", 3, 12, 17]
+          ]
+        },
+        {
+          titulo: "Restauración emocional tras una ruptura matrimonial",
+          citas: [
+            ["Salmos 25:1-22", "PSA", 25, 1, 22],
+            ["Mateo 19:1-9", "MAT", 19, 1, 9],
+            ["Filipenses 3:1-11", "PHP", 3, 1, 11]
+          ]
+        },
+        {
+          titulo: "Refugio cuando nos sentimos desamparados",
+          citas: [
+            ["Salmos 25:1-22", "PSA", 25, 1, 22],
+            ["Isaías 65:17-25", "ISA", 65, 17, 25],
+            ["Lamentaciones 3:19-24", "LAM", 3, 19, 24],
+            ["Lucas 9:57-62", "LUK", 9, 57, 62],
+            ["Apocalipsis 21:1-4", "REV", 21, 1, 4]
+          ]
+        },
+        {
+          titulo: "Esperanza en la privación de libertad o cautiverio",
+          citas: [
+            ["Lamentaciones 3:24-36", "LAM", 3, 24, 36],
+            ["Mateo 25:31-46", "MAT", 25, 31, 46],
+            ["Lucas 4:16-21", "LUK", 4, 16, 21]
+          ]
+        },
+        {
+          titulo: "Amparo frente a catástrofes de la naturaleza",
+          citas: [
+            ["Génesis 8:1-22", "GEN", 8, 1, 22],
+            ["Génesis 9:1-17", "GEN", 9, 1, 17],
+            ["Job 36:22-33", "JOB", 36, 22, 33],
+            ["Job 37:1-13", "JOB", 37, 1, 13],
+            ["Salmos 29:1-11", "PSA", 29, 1, 11],
+            ["Salmos 36:5-9", "PSA", 36, 5, 9],
+            ["Salmos 124:1-8", "PSA", 124, 1, 8],
+            ["Jeremías 31:35-37", "JER", 31, 35, 37],
+            ["Romanos 8:31-39", "ROM", 8, 31, 39],
+            ["1 Pedro 1:3-12", "1PE", 1, 3, 12]
+          ]
+        },
+        {
+          titulo: "Integridad y paz ante procesos legales o juicios",
+          citas: [
+            ["Salmos 26:1-12", "PSA", 26, 1, 12],
+            ["Isaías 50:4-11", "ISA", 50, 4, 11],
+            ["Mateo 5:25-26", "MAT", 5, 25, 26],
+            ["Lucas 18:1-8", "LUK", 18, 1, 8]
+          ]
+        },
+        {
+          titulo: "Clamor por rectitud y equidad ante la injusticia",
+          citas: [
+            ["Salmos 10:1-18", "PSA", 10, 1, 18],
+            ["Salmos 17:1-15", "PSA", 17, 1, 15],
+            ["Salmos 75:1-10", "PSA", 75, 1, 10],
+            ["Salmos 94:1-23", "PSA", 94, 1, 23],
+            ["Isaías 42:1-7", "ISA", 42, 1, 7],
+            ["Isaías 61:1-9", "ISA", 61, 1, 9],
+            ["Amós 5:24", "AMO", 5, 24, 24],
+            ["Habacuc 1:1-4", "HAB", 1, 1, 4],
+            ["Habacuc 2:1-4", "HAB", 2, 1, 4]
+          ]
+        },
+        {
+          titulo: "Confianza ante el desempleo o dificultades laborales",
+          citas: [
+            ["Jeremías 29:10-14", "JER", 29, 10, 14],
+            ["Lucas 16:1-13", "LUK", 16, 1, 13],
+            ["Filipenses 4:10-13", "PHP", 4, 10, 13]
+          ]
+        },
+        {
+          titulo: "Paz frente a pérdidas materiales o económicas",
+          citas: [
+            ["Job 1:13-22", "JOB", 1, 13, 22],
+            ["Job 42:7-17", "JOB", 42, 7, 17],
+            ["Isaías 30:19-26", "ISA", 30, 19, 26],
+            ["Isaías 41:17-20", "ISA", 41, 17, 20],
+            ["Romanos 8:18-39", "ROM", 8, 18, 39]
+          ]
+        },
+        {
+          titulo: "Libertad y victoria frente a las adicciones",
+          citas: [
+            ["Salmos 40:1-5", "PSA", 40, 1, 5],
+            ["Salmos 40:11-17", "PSA", 40, 11, 17],
+            ["Salmos 116:1-7", "PSA", 116, 1, 7],
+            ["Proverbios 23:29-35", "PRO", 23, 29, 35],
+            ["2 Corintios 5:16-21", "2CO", 5, 16, 21],
+            ["Efesios 4:22-24", "EPH", 4, 22, 24]
+          ]
+        }
+      ]
+    },
+    {
+      categoria: "4. Familia, Relaciones y Etapas de la Vida",
+      temas: [
+        {
+          titulo: "Cultivar una amistad leal y verdadera",
+          citas: [
+            ["Proverbios 17:17", "PRO", 17, 17, 17],
+            ["Lucas 10:25-37", "LUK", 10, 25, 37],
+            ["Juan 15:11-17", "JHN", 15, 11, 17],
+            ["Romanos 16:1-2", "ROM", 16, 1, 2]
+          ]
+        },
+        {
+          titulo: "Armonía y empatía en el trato con el prójimo",
+          citas: [
+            ["Deuteronomio 5:16-21", "DEU", 5, 16, 21],
+            ["Proverbios 3:27-35", "PRO", 3, 27, 35],
+            ["Mateo 18:15-17", "MAT", 18, 15, 17],
+            ["Mateo 18:21-35", "MAT", 18, 21, 35],
+            ["Romanos 14:13-23", "ROM", 14, 13, 23],
+            ["Romanos 15:1-6", "ROM", 15, 1, 6],
+            ["Gálatas 6:1-10", "GAL", 6, 1, 10],
+            ["Colosenses 3:12-17", "COL", 3, 12, 17],
+            ["1 Juan 4:7-12", "1JN", 4, 7, 12]
+          ]
+        },
+        {
+          titulo: "Honra y gratitud hacia nuestros padres",
+          citas: [
+            ["Éxodo 20:12", "EXO", 20, 12, 12],
+            ["Proverbios 23:22", "PRO", 23, 22, 22],
+            ["Efesios 6:1-3", "EPH", 6, 1, 3],
+            ["Colosenses 3:20", "COL", 3, 20, 20]
+          ]
+        },
+        {
+          titulo: "Crianza sabia y formación amorosa de los hijos",
+          citas: [
+            ["Proverbios 22:6", "PRO", 22, 6, 6],
+            ["Efesios 6:4", "EPH", 6, 4, 4],
+            ["Colosenses 3:21", "COL", 3, 21, 21]
+          ]
+        },
+        {
+          titulo: "Protección y honra a las viudas y adultos mayores",
+          citas: [
+            ["Génesis 47:1-12", "GEN", 47, 1, 12],
+            ["Rut 1:1-22", "RUT", 1, 1, 22],
+            ["Proverbios 23:22", "PRO", 23, 22, 22],
+            ["1 Timoteo 5:3-8", "1TI", 5, 3, 8]
+          ]
+        },
+        {
+          titulo: "Gratitud por la llegada o adopción de un hijo",
+          citas: [
+            ["Salmos 100:1-5", "PSA", 100, 1, 5],
+            ["Proverbios 22:6", "PRO", 22, 6, 6],
+            ["Lucas 18:15-17", "LUK", 18, 15, 17],
+            ["Juan 16:21-22", "JHN", 16, 21, 22]
+          ]
+        },
+        {
+          titulo: "Bendición para la unión matrimonial",
+          citas: [
+            ["Génesis 2:18-24", "GEN", 2, 18, 24],
+            ["Cantares 8:6-7", "SNG", 8, 6, 7],
+            ["Efesios 5:21-33", "EPH", 5, 21, 33],
+            ["Colosenses 2:6-7", "COL", 2, 6, 7]
+          ]
+        },
+        {
+          titulo: "Celebrar la fidelidad en el aniversario de bodas",
+          citas: [
+            ["Salmos 100:1-5", "PSA", 100, 1, 5],
+            ["1 Corintios 13:1-13", "1CO", 13, 1, 13]
+          ]
+        },
+        {
+          titulo: "Alegría al culminar estudios y graduaciones",
+          citas: [
+            ["Salmos 119:105", "PSA", 119, 105, 105],
+            ["Proverbios 9:10-12", "PRO", 9, 10, 12],
+            ["Gálatas 5:16-26", "GAL", 5, 16, 26],
+            ["Filipenses 4:4-9", "PHP", 4, 4, 9]
+          ]
+        },
+        {
+          titulo: "Sabiduría al iniciar la etapa universitaria",
+          citas: [
+            ["Proverbios 2:1-8", "PRO", 2, 1, 8],
+            ["Proverbios 3:1-18", "PRO", 3, 1, 18],
+            ["Proverbios 4:1-27", "PRO", 4, 1, 27],
+            ["Proverbios 23:12", "PRO", 23, 12, 12],
+            ["Romanos 8:1-17", "ROM", 8, 1, 17],
+            ["1 Corintios 1:18-31", "1CO", 1, 18, 31]
+          ]
+        },
+        {
+          titulo: "Comenzar un nuevo empleo con excelencia",
+          citas: [
+            ["Proverbios 11:3", "PRO", 11, 3, 3],
+            ["Proverbios 22:29", "PRO", 22, 29, 29],
+            ["Malaquías 3:6-12", "MAL", 3, 6, 12],
+            ["Romanos 12:3-11", "ROM", 12, 3, 11],
+            ["1 Tesalonicenses 5:12-18", "1TH", 5, 12, 18],
+            ["2 Tesalonicenses 3:6-13", "2TH", 3, 6, 13],
+            ["1 Pedro 4:7-11", "1PE", 4, 7, 11]
+          ]
+        },
+        {
+          titulo: "Bendición al establecerse en un nuevo hogar",
+          citas: [
+            ["Salmos 127:1-2", "PSA", 127, 1, 2],
+            ["Proverbios 24:3-4", "PRO", 24, 3, 4],
+            ["Juan 14:1-7", "JHN", 14, 1, 7],
+            ["Efesios 3:14-21", "EPH", 3, 14, 21],
+            ["Apocalipsis 3:20-21", "REV", 3, 20, 21]
+          ]
+        },
+        {
+          titulo: "Valor y amparo al ingresar al servicio militar",
+          citas: [
+            ["2 Samuel 22:2-51", "2SA", 22, 2, 51],
+            ["Salmos 91:1-16", "PSA", 91, 1, 16],
+            ["Efesios 6:10-20", "EPH", 6, 10, 20],
+            ["2 Timoteo 2:1-13", "2TI", 2, 1, 13]
+          ]
+        },
+        {
+          titulo: "Propósito y plenitud al llegar a la jubilación",
+          citas: [
+            ["Números 6:24-26", "NUM", 6, 24, 26],
+            ["Salmos 145:1-21", "PSA", 145, 1, 21],
+            ["Mateo 25:31-46", "MAT", 25, 31, 46],
+            ["Romanos 12:1-2", "ROM", 12, 1, 2],
+            ["Filipenses 3:12-21", "PHP", 3, 12, 21],
+            ["2 Pedro 1:2", "2PE", 1, 2, 2]
+          ]
+        },
+        {
+          titulo: "Paz y respaldo de Dios durante la vejez",
+          citas: [
+            ["Salmos 37:23-29", "PSA", 37, 23, 29],
+            ["Isaías 46:3-4", "ISA", 46, 3, 4]
+          ]
+        }
+      ]
+    },
+    {
+      categoria: "5. Carácter, Sabiduría Práctica y Convivencia",
+      temas: [
+        {
+          titulo: "Liderar con integridad y espíritu de servicio",
+          citas: [
+            ["Isaías 11:1-9", "ISA", 11, 1, 9],
+            ["Isaías 32:1-8", "ISA", 32, 1, 8],
+            ["1 Timoteo 3:1-7", "1TI", 3, 1, 7],
+            ["2 Timoteo 2:14-26", "2TI", 2, 14, 26],
+            ["Tito 1:5-9", "TIT", 1, 5, 9]
+          ]
+        },
+        {
+          titulo: "Firmeza de principios ante la presión del entorno",
+          citas: [
+            ["Proverbios 1:7-19", "PRO", 1, 7, 19],
+            ["Romanos 12:1-12", "ROM", 12, 1, 12],
+            ["Gálatas 6:1-5", "GAL", 6, 1, 5],
+            ["Efesios 5:1-20", "EPH", 5, 1, 20]
+          ]
+        },
+        {
+          titulo: "Responsabilidad ciudadana y respeto al orden civil",
+          citas: [
+            ["Marcos 12:13-17", "MRK", 12, 13, 17],
+            ["Romanos 13:1-7", "ROM", 13, 1, 7],
+            ["Tito 3:1-2", "TIT", 3, 1, 2],
+            ["1 Pedro 2:13-17", "1PE", 2, 13, 17]
+          ]
+        },
+        {
+          titulo: "Evitar el rencor y buscar la reconciliación",
+          citas: [
+            ["Levítico 19:17-18", "LEV", 19, 17, 18],
+            ["Mateo 5:23-26", "MAT", 5, 23, 26],
+            ["Lucas 6:27-36", "LUK", 6, 27, 36],
+            ["Efesios 4:25-32", "EPH", 4, 25, 32]
+          ]
+        },
+        {
+          titulo: "Derribar los prejuicios y tratar a todos con igualdad",
+          citas: [
+            ["Mateo 7:1-5", "MAT", 7, 1, 5],
+            ["Hechos 10:34-36", "ACT", 10, 34, 36],
+            ["Gálatas 3:26-29", "GAL", 3, 26, 29],
+            ["Efesios 2:11-22", "EPH", 2, 11, 22],
+            ["Colosenses 3:5-11", "COL", 3, 5, 11],
+            ["Santiago 2:1-13", "JAS", 2, 1, 13]
+          ]
+        },
+        {
+          titulo: "Caminar con humildad y dejar atrás la soberbia",
+          citas: [
+            ["Salmos 131:1-3", "PSA", 131, 1, 3],
+            ["Marcos 9:33-37", "MRK", 9, 33, 37],
+            ["Lucas 14:7-11", "LUK", 14, 7, 11],
+            ["Lucas 18:9-14", "LUK", 18, 9, 14],
+            ["Lucas 22:24-27", "LUK", 22, 24, 27],
+            ["Romanos 12:14-16", "ROM", 12, 14, 16],
+            ["1 Corintios 1:18-31", "1CO", 1, 18, 31],
+            ["2 Corintios 12:1-10", "2CO", 12, 1, 10]
+          ]
+        },
+        {
+          titulo: "Administrar el tiempo con sabiduría y diligencia",
+          citas: [
+            ["Proverbios 12:11", "PRO", 12, 11, 11],
+            ["Proverbios 28:19", "PRO", 28, 19, 19],
+            ["Marcos 13:32-37", "MRK", 13, 32, 37],
+            ["Lucas 21:34-36", "LUK", 21, 34, 36],
+            ["1 Timoteo 4:11-16", "1TI", 4, 11, 16],
+            ["Tito 3:8-14", "TIT", 3, 8, 14]
+          ]
+        },
+        {
+          titulo: "Vencer la postergación y actuar a tiempo",
+          citas: [
+            ["Mateo 22:1-14", "MAT", 22, 1, 14],
+            ["Mateo 25:1-13", "MAT", 25, 1, 13],
+            ["2 Corintios 6:1-2", "2CO", 6, 1, 2]
+          ]
+        },
+        {
+          titulo: "Libertad del corazón frente al apego al dinero",
+          citas: [
+            ["Proverbios 11:7", "PRO", 11, 7, 7],
+            ["Eclesiastés 5:10-20", "ECC", 5, 10, 20],
+            ["Mateo 6:24-34", "MAT", 6, 24, 34],
+            ["Lucas 12:13-21", "LUK", 12, 13, 21],
+            ["1 Timoteo 6:6-10", "1TI", 6, 6, 10]
+          ]
+        }
+      ]
+    }
+  ];
+
+  // Renderizar la Guía Temática en pantalla
+  function renderizarGuiaTemas(filtro = "") {
+    const contenedor = document.getElementById('contenedor-guia');
+    const q = filtro.toLowerCase().trim();
+    contenedor.innerHTML = "";
+
+    GUIA_TEMATICA.forEach(bloque => {
+      const temasFiltrados = bloque.temas.filter(t => 
+        !q || t.titulo.toLowerCase().includes(q) || bloque.categoria.toLowerCase().includes(q) ||
+        t.citas.some(c => c[0].toLowerCase().includes(q))
+      );
+
+      if (temasFiltrados.length === 0) return;
+
+      const seccion = document.createElement('div');
+      seccion.className = 'guia-categoria';
+      seccion.innerHTML = `<h2>${bloque.categoria}</h2>`;
+
+      const grid = document.createElement('div');
+      grid.className = 'guia-grid';
+
+      temasFiltrados.forEach(tema => {
+        const card = document.createElement('div');
+        card.className = 'guia-card';
+
+        const botonesCitas = tema.citas.map(([etiqueta, cod, cap, vIni, vFin]) => 
+          `<button class="cita-link" onclick="irAPasaje('${cod}', ${cap}, ${vIni}, ${vFin})">${etiqueta}</button>`
+        ).join('');
+
+        card.innerHTML = `
+          <h3>${tema.titulo}</h3>
+          <div class="citas-lista">${botonesCitas}</div>
+        `;
+        grid.appendChild(card);
+      });
+
+      seccion.appendChild(grid);
+      contenedor.appendChild(seccion);
+    });
+  }
+
+  function filtrarGuiaTemas(valor) {
+    renderizarGuiaTemas(valor);
+  }
+
+  function abrirGuiaTemas() {
+    switchView('help-view');
+    selLibro.value = "GUIA_TEMAS";
+    selCap.innerHTML = '<option value="">Ir al capítulo...</option>';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function manejarSeleccionLibro(valor) {
+    if (!valor) return;
+    if (valor === "GUIA_TEMAS") {
+      abrirGuiaTemas();
+    } else {
+      switchView('reading-view');
+      cambiarLibro(valor);
+    }
+  }
+
   function switchView(viewId) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
   }
 
-  // Función para volver a Inicio y dejar el selector en "Selecciona un libro..."
   function irAInicio() {
     switchView('home-view');
     selLibro.value = "";
@@ -291,7 +1163,6 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  // Función para cargar el libro seleccionado desde su archivo .json
   async function cambiarLibro(ruta, hacerScrollArriba = true) {
     const contenedor = document.getElementById('lector');
     contenedor.innerHTML = '<p>Cargando libro...</p>';
@@ -310,7 +1181,6 @@
     }
   }
 
-  // Función para dibujar todos los capítulos y versículos del libro en pantalla
   function renderizarLibro(libro) {
     const contenedor = document.getElementById('lector');
     contenedor.innerHTML = `<span class="testamento-badge">${libro.testamento}</span>`;
@@ -319,7 +1189,7 @@
       selCap.innerHTML += `<option value="cap-${numCap}">Capítulo ${numCap}</option>`;
 
       const versHtml = versiculos.map((t, i) =>
-        `<p class="versiculo"><span class="num">${i + 1}</span>${t}</p>`
+        `<p class="versiculo" id="cap-${numCap}-v-${i + 1}"><span class="num">${i + 1}</span>${t}</p>`
       ).join('');
 
       contenedor.innerHTML += `
@@ -334,7 +1204,31 @@
     });
   }
 
-  // Función corregida para desplazarse exactamente al capítulo elegido
+  // Salto directo desde la Guía Temática hacia el libro, capítulo y rango de versículos exacto
+  async function irAPasaje(codigoLibro, numCap, vInicio, vFin) {
+    const ruta = RUTA_LIBRO[codigoLibro];
+    if (!ruta) return;
+
+    switchView('reading-view');
+    selLibro.value = ruta;
+    await cambiarLibro(ruta, false);
+    selCap.value = `cap-${numCap}`;
+
+    setTimeout(() => {
+      document.querySelectorAll('.versiculo.destacado').forEach(v => v.classList.remove('destacado'));
+
+      for (let v = vInicio; v <= vFin; v++) {
+        const versEl = document.getElementById(`cap-${numCap}-v-${v}`);
+        if (versEl) versEl.classList.add('destacado');
+      }
+
+      const primerVers = document.getElementById(`cap-${numCap}-v-${vInicio}`) || document.getElementById(`cap-${numCap}`);
+      if (primerVers) {
+        primerVers.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 80);
+  }
+
   function irACapitulo(idCap) {
     if (!idCap) return;
     setTimeout(() => {
@@ -345,7 +1239,6 @@
     }, 50);
   }
 
-  // Función del buscador de palabras y versículos
   function filtrarTexto(q) {
     const texto = q.toLowerCase().trim();
     if (texto.length > 0) {
@@ -357,7 +1250,6 @@
     });
   }
 
-  // Función conectada a Formspree para enviar sugerencias anónimas a tu correo
   async function sendFeedback() {
     const campo = document.getElementById('user-feedback');
     const boton = document.getElementById('btn-feedback');
@@ -394,10 +1286,13 @@
         boton.textContent = "Enviar sugerencia";
     }
   }
+
+  // Inicializar la guía temática al cargar la página
+  renderizarGuiaTemas();
 </script>
 
 <!-- =================================================================
-     6. CONTADOR DE VISITAS ANÓNIMO Y SIN COOKIES (GOATCOUNTER)
+     7. CONTADOR DE VISITAS ANÓNIMO Y SIN COOKIES (GOATCOUNTER)
      ================================================================= -->
 <script data-goatcounter="https://biblia-estudio.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
