@@ -258,7 +258,7 @@
     window.scrollTo(0, 0);
   }
 
-  async function cambiarLibro(ruta) {
+async function cambiarLibro(ruta) {
     const contenedor = document.getElementById('lector');
     const selCap = document.getElementById('sel-cap');
     contenedor.innerHTML = '<p>Cargando libro...</p>';
@@ -269,8 +269,17 @@
       if (!resp.ok) throw new Error('Aún no subido');
       const datos = await resp.json();
       renderizarLibro(datos);
+      window.scrollTo(0, 0);
     } catch (e) {
       contenedor.innerHTML = `<p>Para ver este libro, sube el archivo <strong>${ruta}.json</strong> a tu repositorio.</p>`;
+    }
+  }
+
+  function irACapitulo(idCap) {
+    if (!idCap) return;
+    const el = document.getElementById(idCap);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
 
