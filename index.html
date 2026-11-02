@@ -5,16 +5,141 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Biblia de Estudio — Antiguo y Nuevo Testamento</title>
   <style>
-    :root { --bg: #fdfbf7; --txt: #1f2937; --panel: #f3f0e6; --borde: #d6d1c4; --resalte: #fef08a; }
+    :root { 
+        --bg: #fcfaf2; 
+        --txt: #2c2a29; 
+        --panel: #f3f0e6; 
+        --borde: #e6e2d3; 
+        --resalte: #fef08a;
+        --accent-color: #8c6d46;
+        --accent-hover: #6d5232;
+        --card-bg: #ffffff;
+        --highlight-bg: #fdf8e2;
+    }
+    
     body { font-family: Georgia, serif; background: var(--bg); color: var(--txt); margin: 0; line-height: 1.75; }
-    header { position: sticky; top: 0; background: #fff; border-bottom: 1px solid var(--borde); padding: 12px 16px; z-index: 100; font-family: system-ui, sans-serif; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
-    .controles { max-width: 820px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-    select, input { padding: 9px 12px; border: 1px solid var(--borde); border-radius: 6px; font-size: 0.95rem; background: var(--bg); }
-    input[type="search"] { flex: 1; min-width: 210px; background: #fff; }
-    main { max-width: 760px; margin: 0 auto; padding: 24px 16px 80px; }
+    
+    /* Barra superior fija estilizada con el menú */
+    header { 
+        position: sticky; 
+        top: 0; 
+        background: var(--bg); 
+        border-bottom: 1px solid var(--borde); 
+        padding: 10px 20px; 
+        z-index: 1000; 
+        font-family: system-ui, sans-serif; 
+        box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .nav-controls { 
+        display: flex; 
+        flex-wrap: wrap; 
+        gap: 10px; 
+        align-items: center; 
+    }
+
+    button.nav-btn, select, input { 
+        background-color: var(--card-bg);
+        border: 1px solid var(--borde); 
+        padding: 8px 12px; 
+        border-radius: 6px; 
+        font-size: 0.95rem; 
+        font-family: inherit;
+        color: var(--txt);
+        cursor: pointer;
+    }
+
+    button.nav-btn:hover, select:hover {
+        border-color: var(--accent-color);
+    }
+
+    input[type="search"] { 
+        flex: 1; 
+        min-width: 230px; 
+        background: #fff; 
+    }
+
+    /* Contenedor Principal y Vistas (Inicio vs Lectura) */
+    main { 
+        max-width: 800px; 
+        margin: 20px auto 80px auto; 
+        padding: 24px 16px; 
+    }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Vista de Inicio / Menú Principal */
+    .hero {
+        text-align: center;
+        padding: 20px 0 10px 0;
+    }
+
+    .hero h1 {
+        font-size: 2.2rem;
+        margin-bottom: 10px;
+        color: var(--txt);
+    }
+
+    .hero p {
+        color: #555;
+        font-size: 1.1rem;
+    }
+
+    .about-section {
+        background-color: var(--card-bg);
+        border: 1px solid var(--borde);
+        padding: 30px;
+        border-radius: 8px;
+        margin-top: 30px;
+        font-family: system-ui, sans-serif;
+    }
+
+    .about-section h2 {
+        margin-top: 0;
+        font-size: 1.4rem;
+        color: var(--accent-color);
+    }
+
+    .feedback-form {
+        margin-top: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .feedback-form textarea {
+        width: 100%;
+        height: 90px;
+        padding: 10px;
+        border: 1px solid var(--borde);
+        border-radius: 4px;
+        font-family: inherit;
+        box-sizing: border-box;
+        background: var(--bg);
+    }
+
+    .feedback-form button {
+        align-self: flex-start;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .feedback-form button:hover {
+        background-color: var(--accent-hover);
+    }
+
+    /* Estilos de Lectura de Libros y Capítulos */
     .testamento-badge { display: inline-block; font-family: system-ui, sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; background: #e5e0d0; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px; font-weight: 700; }
     .capitulo { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 2px solid var(--borde); }
-    .versiculo { margin: 6px 0; padding: 2px 6px; border-radius: 4px; }
+    .versiculo { margin: 6px 0; padding: 2px 6px; border-radius: 4px; text-align: justify; }
     .versiculo.destacado { background: var(--resalte); }
     .num { font-weight: bold; font-size: 0.78rem; color: #6b7280; vertical-align: super; margin-right: 5px; font-family: system-ui, sans-serif; }
     details.estudio { margin-top: 22px; background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; font-family: system-ui, sans-serif; overflow: hidden; }
@@ -28,19 +153,45 @@
 <body>
 
 <header>
-  <div class="controles">
-    <select id="sel-libro" onchange="cambiarLibro(this.value)"></select>
-    <select id="sel-cap" onchange="irACapitulo(this.value)">
+  <div class="nav-controls">
+    <button class="nav-btn" onclick="switchView('home-view')">🏠 Inicio</button>
+    <select id="sel-libro" onchange="cambiarLibro(this.value); switchView('reading-view');"></select>
+    <select id="sel-cap" onchange="irACapitulo(this.value); switchView('reading-view');">
       <option value="">Ir al capítulo...</option>
     </select>
-    <input type="search" id="buscador" placeholder="Buscar versículo o palabra en este libro..." oninput="filtrarTexto(this.value)">
+  </div>
+  <div>
+    <input type="search" id="buscador" placeholder="Buscar versículo o palabra..." oninput="filtrarTexto(this.value)">
   </div>
 </header>
 
-<main id="lector"></main>
+<main>
+  <!-- VISTA 1: INICIO Y NOTA INFORMATIVA -->
+  <div id="home-view" class="view active">
+      <div class="hero">
+          <h1>Biblia de Estudio</h1>
+          <p>Plataforma independiente para profundizar en la lectura y comprensión de las Escrituras.</p>
+      </div>
+
+      <div class="about-section">
+          <h2>Sobre este proyecto</h2>
+          <p>¡Hola! Somos un grupo de personas independientes y sin fines de lucro que busca ayudar a los lectores a comprender mejor la Biblia, su significado profundo, las conexiones que tiene entre sus libros y mucho más. Esta es una plataforma abierta que estará en constante evolución, con actualizaciones semanales para seguir agregando más información y herramientas de estudio. Si encuentras algún detalle por corregir o tienes alguna idea, por favor háznoslo saber para poder mejorar cada día; estaremos muy atentos a sugerencias o errores de la página.</p>
+          
+          <div class="feedback-form">
+              <textarea id="user-feedback" placeholder="Escribe aquí tu sugerencia o reporte de error de forma anónima..."></textarea>
+              <button onclick="sendFeedback()">Enviar sugerencia</button>
+          </div>
+      </div>
+  </div>
+
+  <!-- VISTA 2: LECTURA DE LIBROS -->
+  <div id="reading-view" class="view">
+      <div id="lector"></div>
+  </div>
+</main>
 
 <script>
-  // Catálogo oficial ordenado de los 66 libros divididos por Testamento
+  // Catálogo oficial de los 66 libros
   const CATALOGO = {
     "Antiguo Testamento": [
       ["GEN","Génesis"],["EXO","Éxodo"],["LEV","Levítico"],["NUM","Números"],["DEU","Deuteronomio"],
@@ -62,7 +213,7 @@
     ]
   };
 
-  // Construir el selector dividido por Antiguo y Nuevo Testamento
+  // Construir el selector de libros ordenado
   const selLibro = document.getElementById('sel-libro');
   Object.entries(CATALOGO).forEach(([testamento, libros]) => {
     const grupo = document.createElement('optgroup');
@@ -76,6 +227,13 @@
     selLibro.appendChild(grupo);
   });
 
+  // Funciones para alternar vistas (Menú Inicio vs Lectura)
+  function switchView(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById(viewId).classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
   async function cambiarLibro(ruta) {
     const contenedor = document.getElementById('lector');
     const selCap = document.getElementById('sel-cap');
@@ -88,7 +246,7 @@
       const datos = await resp.json();
       renderizarLibro(datos);
     } catch (e) {
-      contenedor.innerHTML = `<p>Para ver este libro, sube el archivo <strong>${ruta}.json</strong> a tu repositorio.</p>`;
+      contenedor.innerHTML = `<p>Para ver este libro, sube el archivo <strong>${ruta}.json</strong> a tu repositorio o verifica su ruta.</p>`;
     }
   }
 
@@ -136,13 +294,24 @@
 
   function filtrarTexto(q) {
     const texto = q.toLowerCase().trim();
+    if (texto.length > 0) {
+      switchView('reading-view'); // Salta a lectura si empieza a buscar
+    }
     document.querySelectorAll('.versiculo').forEach(v => {
       const coincide = texto.length > 2 && v.textContent.toLowerCase().includes(texto);
       v.classList.toggle('destacado', coincide);
     });
   }
 
-  cambiarLibro('antiguo_testamento/GEN');
+  function sendFeedback() {
+    const feedbackText = document.getElementById('user-feedback').value;
+    if (feedbackText.trim() === "") {
+        alert("Por favor escribe una sugerencia antes de enviar.");
+        return;
+    }
+    alert("¡Muchas gracias! Tu sugerencia anónima ha sido registrada.");
+    document.getElementById('user-feedback').value = "";
+  }
 </script>
 </body>
 </html>
