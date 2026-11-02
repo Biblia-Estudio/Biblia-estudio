@@ -143,6 +143,11 @@
         background-color: var(--accent-hover);
     }
 
+    .feedback-form button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
     /* Estilos de Lectura de Libros y Capítulos */
     .testamento-badge { display: inline-block; font-family: system-ui, sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; background: #e5e0d0; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px; font-weight: 700; }
     .capitulo { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 2px solid var(--borde); }
@@ -190,7 +195,7 @@
           
           <div class="feedback-form">
               <textarea id="user-feedback" placeholder="Escribe aquí tu sugerencia o reporte de error de forma anónima..."></textarea>
-              <button onclick="sendFeedback()">Enviar sugerencia</button>
+              <button id="btn-feedback" onclick="sendFeedback()">Enviar sugerencia</button>
           </div>
       </div>
 
@@ -199,7 +204,7 @@
           <h2>Agradecimientos y Reconocimiento Legal</h2>
           <p>Expresamos nuestro más sincero agradecimiento a <strong><a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a></strong> por su valioso trabajo al proveer las Sagradas Escrituras para este proyecto.</p>
           <p style="font-size: 0.9rem; color: #555; margin-bottom: 0;">
-            Texto bíblico base tomado y adaptado en formato digital de la <em>Santa Biblia Libre para el Mundo</em> (<a href="https://ebible.org/spablm/" target="_blank" rel="noopener">spablm</a>), Copyright © 2022 por Biblica, Inc. y Michael Paul Johnson, provisto por <a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a> y utilizado bajo la licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)</a>. Se ha modificado el formato original para su visualización interactiva y se han añadido espacios para notas de estudio. Las notas históricas, aclaraciones de traducción y comentarios adicionales agregados en esta edición independiente están licenciados bajo esta misma licencia [<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-SA 4.0</a>]. Ni Biblica, Inc., ni Michael Paul Johnson, ni eBible.org respaldan oficialmente este sitio ni las notas de estudio aquí agregadas, este sitio tiene fin de ayuda o apoyar a los lectores, además este sitio web es sin fines de lucro.
+            Texto bíblico base tomado y adaptado en formato digital de la <em>Santa Biblia Libre para el Mundo</em> (<a href="https://ebible.org/spablm/" target="_blank" rel="noopener">spablm</a>), Copyright © 2022 por Biblica, Inc. y Michael Paul Johnson, provisto por <a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a> y utilizado bajo la licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)</a>. Se ha modificado el formato original para su visualización interactiva y se han añadido espacios para notas de estudio. Las notas históricas, aclaraciones de traducción y comentarios adicionales agregados en esta edición independiente están licenciados bajo esta misma licencia [<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-SA 4.0</a>]. Ni Biblica, Inc., ni Michael Paul Johnson, ni eBible.org respaldan oficialmente este sitio ni las notas de estudio aquí agregadas.
           </p>
       </div>
   </div>
@@ -310,14 +315,41 @@
     });
   }
 
-  function sendFeedback() {
-    const feedbackText = document.getElementById('user-feedback').value;
-    if (feedbackText.trim() === "") {
+  async function sendFeedback() {
+    const campo = document.getElementById('user-feedback');
+    const boton = document.getElementById('btn-feedback');
+    const feedbackText = campo.value.trim();
+
+    if (feedbackText === "") {
         alert("Por favor escribe una sugerencia antes de enviar.");
         return;
     }
-    alert("¡Muchas gracias! Tu sugerencia anónima ha sido registrada.");
-    document.getElementById('user-feedback').value = "";
+
+    boton.disabled = true;
+    boton.textContent = "Enviando...";
+
+    try {
+        const respuesta = await fetch("https://formspree.io/f/xnppojeb", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            },
+            body: JSON.stringify({ sugerencia_anonima: feedbackText })
+        });
+
+        if (respuesta.ok) {
+            alert("¡Muchas gracias! Tu sugerencia anónima ha sido enviada con éxito.");
+            campo.value = "";
+        } else {
+            alert("Hubo un problema al enviar. Inténtalo de nuevo más tarde.");
+        }
+    } catch (error) {
+        alert("Error de conexión al enviar la sugerencia.");
+    } finally {
+        boton.disabled = false;
+        boton.textContent = "Enviar sugerencia";
+    }
   }
 
   // Cargar Génesis en segundo plano para tener el lector preparado
