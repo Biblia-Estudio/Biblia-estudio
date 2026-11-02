@@ -209,7 +209,7 @@
       </div>
   </div>
 
-<!-- VISTA 2: LECTURA DE LIBROS -->
+  <!-- VISTA 2: LECTURA DE LIBROS -->
   <div id="reading-view" class="view">
       <div id="lector"></div>
   </div>
@@ -238,7 +238,7 @@
     ]
   };
 
- // Construir el selector dividido por Antiguo y Nuevo Testamento
+  // Construir el selector dividido por Antiguo y Nuevo Testamento
   const selLibro = document.getElementById('sel-libro');
   Object.entries(CATALOGO).forEach(([testamento, libros]) => {
     const grupo = document.createElement('optgroup');
@@ -355,9 +355,5 @@
   // Cargar Génesis en segundo plano para tener el lector preparado
   cambiarLibro('antiguo_testamento/GEN');
 </script>
-
-<!-- Contador de visitas anónimo y sin cookies (GoatCounter) -->
-<script data-goatcounter="https://biblia-estudio.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
