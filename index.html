@@ -155,7 +155,9 @@
 <header>
   <div class="nav-controls">
     <button class="nav-btn" onclick="switchView('home-view')">🏠 Inicio</button>
-    <select id="sel-libro" onchange="cambiarLibro(this.value); switchView('reading-view');"></select>
+    <select id="sel-libro" onchange="cambiarLibro(this.value); switchView('reading-view');">
+      <option value="">Selecciona un libro...</option>
+    </select>
     <select id="sel-cap" onchange="irACapitulo(this.value); switchView('reading-view');">
       <option value="">Ir al capítulo...</option>
     </select>
@@ -166,7 +168,7 @@
 </header>
 
 <main>
-  <!-- VISTA 1: INICIO Y NOTA INFORMATIVA -->
+  <!-- VISTA 1: INICIO, NOTA INFORMATIVA Y AGRADECIMIENTOS -->
   <div id="home-view" class="view active">
       <div class="hero">
           <h1>Biblia de Estudio</h1>
@@ -182,6 +184,12 @@
               <button onclick="sendFeedback()">Enviar sugerencia</button>
           </div>
       </div>
+
+      <!-- Apartado de Agradecimientos Formales -->
+      <div class="about-section">
+          <h2>Agradecimientos Especiales</h2>
+          <p>Queremos expresar nuestro más sincero agradecimiento a la organización <strong>eBible.org</strong> por su valioso aporte al proveer el texto completo de las Sagradas Escrituras. Su generoso trabajo y dedicación han hecho posible contar con la Biblia entera en este proyecto, facilitando el acceso a la lectura y al estudio bíblico para todos los usuarios de manera libre y abierta.</p>
+      </div>
   </div>
 
   <!-- VISTA 2: LECTURA DE LIBROS -->
@@ -191,7 +199,7 @@
 </main>
 
 <script>
-  // Catálogo oficial de los 66 libros
+  // Catálogo oficial ordenado de los 66 libros
   const CATALOGO = {
     "Antiguo Testamento": [
       ["GEN","Génesis"],["EXO","Éxodo"],["LEV","Levítico"],["NUM","Números"],["DEU","Deuteronomio"],
@@ -213,7 +221,7 @@
     ]
   };
 
-  // Construir el selector de libros ordenado
+  // Construir el selector de libros dividido por Antiguo y Nuevo Testamento
   const selLibro = document.getElementById('sel-libro');
   Object.entries(CATALOGO).forEach(([testamento, libros]) => {
     const grupo = document.createElement('optgroup');
