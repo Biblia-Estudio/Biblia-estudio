@@ -183,7 +183,7 @@
      ================================================================= -->
 <header>
   <div class="nav-controls">
-    <button class="nav-btn" onclick="switchView('home-view'); window.scrollTo(0, 0);">🏠 Inicio</button>
+    <button class="nav-btn" onclick="irAInicio()">🏠 Inicio</button>
     <select id="sel-libro" onchange="if(this.value) { switchView('reading-view'); cambiarLibro(this.value); }">
       <option value="">Selecciona un libro...</option>
     </select>
@@ -263,6 +263,8 @@
 
   // Construir el selector dividido por Antiguo y Nuevo Testamento
   const selLibro = document.getElementById('sel-libro');
+  const selCap = document.getElementById('sel-cap');
+
   Object.entries(CATALOGO).forEach(([testamento, libros]) => {
     const grupo = document.createElement('optgroup');
     grupo.label = testamento;
@@ -281,10 +283,17 @@
     document.getElementById(viewId).classList.add('active');
   }
 
+  // Función para volver a Inicio y dejar el selector en "Selecciona un libro..."
+  function irAInicio() {
+    switchView('home-view');
+    selLibro.value = "";
+    selCap.innerHTML = '<option value="">Ir al capítulo...</option>';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   // Función para cargar el libro seleccionado desde su archivo .json
   async function cambiarLibro(ruta, hacerScrollArriba = true) {
     const contenedor = document.getElementById('lector');
-    const selCap = document.getElementById('sel-cap');
     contenedor.innerHTML = '<p>Cargando libro...</p>';
     selCap.innerHTML = '<option value="">Ir al capítulo...</option>';
 
@@ -304,7 +313,6 @@
   // Función para dibujar todos los capítulos y versículos del libro en pantalla
   function renderizarLibro(libro) {
     const contenedor = document.getElementById('lector');
-    const selCap = document.getElementById('sel-cap');
     contenedor.innerHTML = `<span class="testamento-badge">${libro.testamento}</span>`;
 
     Object.entries(libro.capitulos).forEach(([numCap, versiculos]) => {
@@ -386,10 +394,6 @@
         boton.textContent = "Enviar sugerencia";
     }
   }
-
-  // Cargar Génesis inicialmente en segundo plano y dejarlo seleccionado en el menú
-  selLibro.value = 'antiguo_testamento/GEN';
-  cambiarLibro('antiguo_testamento/GEN', false);
 </script>
 
 <!-- =================================================================
