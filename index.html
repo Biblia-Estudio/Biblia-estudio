@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Biblia de Estudio — Antiguo y Nuevo Testamento</title>
+  
+  <!-- =================================================================
+       1. ESTILOS VISUALES Y DISEÑO DE LA PÁGINA (CSS)
+       ================================================================= -->
   <style>
     :root { 
         --bg: #fcfaf2; 
@@ -150,12 +154,20 @@
 
     /* Estilos de Lectura de Libros y Capítulos */
     .testamento-badge { display: inline-block; font-family: system-ui, sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; background: #e5e0d0; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px; font-weight: 700; }
-    .capitulo { margin-bottom: 48px; padding-bottom: 28px; border-bottom: 2px solid var(--borde); }
+    
+    /* scroll-margin-top evita que la barra superior fija tape el título del capítulo al seleccionarlo */
+    .capitulo { 
+        margin-bottom: 48px; 
+        padding-bottom: 28px; 
+        border-bottom: 2px solid var(--borde); 
+        scroll-margin-top: 85px; 
+    }
+    
     .versiculo { margin: 6px 0; padding: 2px 6px; border-radius: 4px; text-align: justify; }
     .versiculo.destacado { background: var(--resalte); }
     .num { font-weight: bold; font-size: 0.78rem; color: #6b7280; vertical-align: super; margin-right: 5px; font-family: system-ui, sans-serif; }
     
-    /* Triangulito minimalista sin textos adicionales */
+    /* Triangulito desplegable para notas de estudio */
     details.estudio { margin-top: 14px; display: inline-block; font-family: system-ui, sans-serif; }
     summary { list-style: none; cursor: pointer; padding: 4px 8px; color: var(--accent-color); font-size: 0.95rem; user-select: none; display: inline-block; }
     summary::-webkit-details-marker { display: none; }
@@ -166,13 +178,16 @@
 </head>
 <body>
 
+<!-- =================================================================
+     2. BARRA DE NAVEGACIÓN SUPERIOR (SELECCIÓN DE LIBROS Y CAPÍTULOS)
+     ================================================================= -->
 <header>
   <div class="nav-controls">
-    <button class="nav-btn" onclick="switchView('home-view')">🏠 Inicio</button>
-    <select id="sel-libro" onchange="if(this.value) { cambiarLibro(this.value); switchView('reading-view'); }">
+    <button class="nav-btn" onclick="switchView('home-view'); window.scrollTo(0, 0);">🏠 Inicio</button>
+    <select id="sel-libro" onchange="if(this.value) { switchView('reading-view'); cambiarLibro(this.value); }">
       <option value="">Selecciona un libro...</option>
     </select>
-    <select id="sel-cap" onchange="if(this.value) { irACapitulo(this.value); switchView('reading-view'); }">
+    <select id="sel-cap" onchange="if(this.value) { switchView('reading-view'); irACapitulo(this.value); }">
       <option value="">Ir al capítulo...</option>
     </select>
   </div>
@@ -182,13 +197,16 @@
 </header>
 
 <main>
-  <!-- VISTA 1: INICIO, NOTA INFORMATIVA Y AGRADECIMIENTO LEGAL -->
+  <!-- =================================================================
+       3. VISTA DE INICIO: PROYECTO, BUZÓN ANÓNIMO Y AVISO LEGAL BLINDADO
+       ================================================================= -->
   <div id="home-view" class="view active">
       <div class="hero">
           <h1>Biblia de Estudio</h1>
           <p>Plataforma independiente para profundizar en la lectura y comprensión de las Escrituras.</p>
       </div>
 
+      <!-- Sección de bienvenida y formulario de sugerencias -->
       <div class="about-section">
           <h2>Sobre este proyecto</h2>
           <p>¡Hola! Somos un grupo de personas independientes y sin fines de lucro que busca ayudar a los lectores a comprender mejor la Biblia, su significado profundo, las conexiones que tiene entre sus libros y mucho más. Esta es una plataforma abierta que estará en constante evolución, con actualizaciones semanales para seguir agregando más información y herramientas de estudio. Si encuentras algún detalle por corregir o tienes alguna idea, por favor háznoslo saber para poder mejorar cada día; estaremos muy atentos a tus sugerencias o reportes de errores de la página.</p>
@@ -199,7 +217,7 @@
           </div>
       </div>
 
-      <!-- Apartado de Agradecimientos y Cumplimiento Estricto de Licencia -->
+      <!-- Apartado de Agradecimientos y Cumplimiento Estricto de Licencia CC BY-SA 4.0 -->
       <div class="about-section">
           <h2>Agradecimientos y Reconocimiento Legal</h2>
           <p>Expresamos nuestro más sincero agradecimiento a <strong><a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a></strong> por su valioso trabajo al proveer las Sagradas Escrituras para este proyecto.</p>
@@ -209,12 +227,17 @@
       </div>
   </div>
 
-  <!-- VISTA 2: LECTURA DE LIBROS -->
+  <!-- =================================================================
+       4. VISTA DE LECTURA DE LIBROS BÍBLICOS
+       ================================================================= -->
   <div id="reading-view" class="view">
       <div id="lector"></div>
   </div>
 </main>
 
+<!-- =================================================================
+     5. LÓGICA DEL SISTEMA: LIBROS, CAPÍTULOS, BUSCADOR Y FORMSPREE
+     ================================================================= -->
 <script>
   // Catálogo oficial ordenado de los 66 libros divididos por Testamento
   const CATALOGO = {
@@ -252,13 +275,14 @@
     selLibro.appendChild(grupo);
   });
 
+  // Función para alternar entre la pantalla de Inicio y la de Lectura
   function switchView(viewId) {
     document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
     document.getElementById(viewId).classList.add('active');
-    window.scrollTo(0, 0);
   }
 
-  async function cambiarLibro(ruta) {
+  // Función para cargar el libro seleccionado desde su archivo .json
+  async function cambiarLibro(ruta, hacerScrollArriba = true) {
     const contenedor = document.getElementById('lector');
     const selCap = document.getElementById('sel-cap');
     contenedor.innerHTML = '<p>Cargando libro...</p>';
@@ -269,11 +293,15 @@
       if (!resp.ok) throw new Error('Aún no subido');
       const datos = await resp.json();
       renderizarLibro(datos);
+      if (hacerScrollArriba) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } catch (e) {
       contenedor.innerHTML = `<p>Para ver este libro, sube el archivo <strong>${ruta}.json</strong> a tu repositorio.</p>`;
     }
   }
 
+  // Función para dibujar todos los capítulos y versículos del libro en pantalla
   function renderizarLibro(libro) {
     const contenedor = document.getElementById('lector');
     const selCap = document.getElementById('sel-cap');
@@ -298,12 +326,18 @@
     });
   }
 
+  // Función corregida para desplazarse exactamente al capítulo elegido
   function irACapitulo(idCap) {
     if (!idCap) return;
-    const el = document.getElementById(idCap);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    setTimeout(() => {
+      const el = document.getElementById(idCap);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 50);
   }
 
+  // Función del buscador de palabras y versículos
   function filtrarTexto(q) {
     const texto = q.toLowerCase().trim();
     if (texto.length > 0) {
@@ -315,6 +349,7 @@
     });
   }
 
+  // Función conectada a Formspree para enviar sugerencias anónimas a tu correo
   async function sendFeedback() {
     const campo = document.getElementById('user-feedback');
     const boton = document.getElementById('btn-feedback');
@@ -352,8 +387,15 @@
     }
   }
 
-  // Cargar Génesis en segundo plano para tener el lector preparado
-  cambiarLibro('antiguo_testamento/GEN');
+  // Cargar Génesis inicialmente en segundo plano y dejarlo seleccionado en el menú
+  selLibro.value = 'antiguo_testamento/GEN';
+  cambiarLibro('antiguo_testamento/GEN', false);
 </script>
+
+<!-- =================================================================
+     6. CONTADOR DE VISITAS ANÓNIMO Y SIN COOKIES (GOATCOUNTER)
+     ================================================================= -->
+<script data-goatcounter="https://biblia-estudio.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
