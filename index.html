@@ -238,7 +238,7 @@
     ]
   };
 
-  // Construir el selector dividido por Antiguo y Nuevo Testamento
+ // Construir el selector dividido por Antiguo y Nuevo Testamento
   const selLibro = document.getElementById('sel-libro');
   Object.entries(CATALOGO).forEach(([testamento, libros]) => {
     const grupo = document.createElement('optgroup');
@@ -258,7 +258,7 @@
     window.scrollTo(0, 0);
   }
 
-async function cambiarLibro(ruta) {
+  async function cambiarLibro(ruta) {
     const contenedor = document.getElementById('lector');
     const selCap = document.getElementById('sel-cap');
     contenedor.innerHTML = '<p>Cargando libro...</p>';
@@ -282,38 +282,6 @@ async function cambiarLibro(ruta) {
     Object.entries(libro.capitulos).forEach(([numCap, versiculos]) => {
       selCap.innerHTML += `<option value="cap-${numCap}">Capítulo ${numCap}</option>`;
 
-      const versHtml = versiculos.map((t, i) =>
-        `<p class="versiculo"><span class="num">${i + 1}</span>${t}</p>`
-      ).join('');
-
-      contenedor.innerHTML += `
-        <section class="capitulo" id="cap-${numCap}">
-          <h2>${libro.nombre} ${numCap}</h2>
-          ${versHtml}
-          <details class="estudio">
-            <summary title="Más información"><span class="triangulo">▶</span></summary>
-            <div class="estudio-cuerpo"></div>
-          </details>
-        </section>`;
-    });
-  }
-
-function irACapitulo(idCap) {
-    if (!idCap) return;
-    const el = document.getElementById(idCap);
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  }
-
-  function filtrarTexto(q) {
-    const texto = q.toLowerCase().trim();
-    if (texto.length > 0) {
-      switchView('reading-view');
-    }
-    document.querySelectorAll('.versiculo').forEach(v => {
-      const coincide = texto.length > 2 && v.textContent.toLowerCase().includes(texto);
-      v.classList.toggle('destacado', coincide);
-    });
-  }
       const versHtml = versiculos.map((t, i) =>
         `<p class="versiculo"><span class="num">${i + 1}</span>${t}</p>`
       ).join('');
