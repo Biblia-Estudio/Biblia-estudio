@@ -269,10 +269,33 @@ async function cambiarLibro(ruta) {
       if (!resp.ok) throw new Error('Aún no subido');
       const datos = await resp.json();
       renderizarLibro(datos);
-      window.scrollTo(0, 0);
     } catch (e) {
       contenedor.innerHTML = `<p>Para ver este libro, sube el archivo <strong>${ruta}.json</strong> a tu repositorio.</p>`;
     }
+  }
+
+  function renderizarLibro(libro) {
+    const contenedor = document.getElementById('lector');
+    const selCap = document.getElementById('sel-cap');
+    contenedor.innerHTML = `<span class="testamento-badge">${libro.testamento}</span>`;
+
+    Object.entries(libro.capitulos).forEach(([numCap, versiculos]) => {
+      selCap.innerHTML += `<option value="cap-${numCap}">Capítulo ${numCap}</option>`;
+
+      const versHtml = versiculos.map((t, i) =>
+        `<p class="versiculo"><span class="num">${i + 1}</span>${t}</p>`
+      ).join('');
+
+      contenedor.innerHTML += `
+        <section class="capitulo" id="cap-${numCap}">
+          <h2>${libro.nombre} ${numCap}</h2>
+          ${versHtml}
+          <details class="estudio">
+            <summary title="Más información"><span class="triangulo">▶</span></summary>
+            <div class="estudio-cuerpo"></div>
+          </details>
+        </section>`;
+    });
   }
 
   function irACapitulo(idCap) {
