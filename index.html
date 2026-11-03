@@ -237,13 +237,102 @@
     .versiculo.destacado { background: var(--resalte); }
     .num { font-weight: bold; font-size: 0.78rem; color: #6b7280; vertical-align: super; margin-right: 5px; font-family: system-ui, sans-serif; }
     
-    /* Triangulito desplegable para notas de estudio */
-    details.estudio { margin-top: 14px; display: inline-block; font-family: system-ui, sans-serif; }
-    summary { list-style: none; cursor: pointer; padding: 4px 8px; color: var(--accent-color); font-size: 0.95rem; user-select: none; display: inline-block; }
+    /* Triangulito desplegable y Tarjetas de Estudio tipo X/Facebook */
+    details.estudio { margin-top: 14px; display: block; font-family: system-ui, sans-serif; }
+    summary { list-style: none; cursor: pointer; padding: 4px 8px; color: var(--accent-color); font-size: 0.95rem; user-select: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
     summary::-webkit-details-marker { display: none; }
     .triangulo { display: inline-block; transition: transform 0.2s; }
     details[open] .triangulo { transform: rotate(90deg); }
     .estudio-cuerpo { margin-top: 8px; padding: 16px; background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; font-size: 0.95rem; line-height: 1.6; }
+
+    .post-estudio {
+        background: var(--card-bg);
+        border: 1px solid var(--borde);
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+    }
+
+    .post-estudio:last-child { margin-bottom: 0; }
+    .post-texto { white-space: pre-wrap; margin: 0 0 10px 0; color: var(--txt); }
+    
+    .post-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        font-size: 0.82rem;
+        color: #666;
+        border-top: 1px dashed var(--borde);
+        padding-top: 8px;
+    }
+
+    .post-fuente { font-style: italic; color: var(--accent-color); font-weight: 600; }
+
+    .caja-editor {
+        margin-top: 14px;
+        padding-top: 14px;
+        border-top: 2px solid var(--borde);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .caja-editor textarea {
+        width: 100%;
+        min-height: 80px;
+        padding: 10px;
+        border: 1px solid var(--borde);
+        border-radius: 6px;
+        font-family: inherit;
+        box-sizing: border-box;
+        background: #fff;
+    }
+
+    .caja-editor input {
+        width: 100%;
+        box-sizing: border-box;
+        background: #fff;
+        cursor: text;
+    }
+
+    .btn-publicar {
+        align-self: flex-start;
+        background: var(--accent-color);
+        color: #fff;
+        border: none;
+        padding: 7px 15px;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+    }
+
+    .btn-eliminar {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #f87171;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-size: 0.78rem;
+        cursor: pointer;
+    }
+
+    .footer-editor {
+        margin-top: 40px;
+        text-align: center;
+        font-family: system-ui, sans-serif;
+    }
+
+    .btn-acceso-editor {
+        background: transparent;
+        border: 1px solid var(--borde);
+        color: #777;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 0.82rem;
+        cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -298,6 +387,11 @@
             Texto bíblico base tomado y adaptado en formato digital de la <em>Santa Biblia Libre para el Mundo</em> (<a href="https://ebible.org/spablm/" target="_blank" rel="noopener">spablm</a>), Copyright © 2022 por Biblica, Inc. y Michael Paul Johnson, provisto por <a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a> y utilizado bajo la licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)</a>. Se ha modificado el formato original para su visualización interactiva y se han añadido espacios para notas de estudio. Las notas históricas, aclaraciones de traducción y comentarios adicionales agregados en esta edición independiente están licenciados bajo esta misma licencia [<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-SA 4.0</a>]. Ni Biblica, Inc., ni Michael Paul Johnson, ni eBible.org respaldan oficialmente este sitio ni las notas de estudio aquí agregadas.
           </p>
       </div>
+
+      <!-- Botón discreto para los 2 editores autorizados -->
+      <div class="footer-editor">
+          <button id="btn-editor-login" class="btn-acceso-editor" onclick="configurarModoEditor()">🔒 Acceso Editores</button>
+      </div>
   </div>
 
   <!-- =================================================================
@@ -321,9 +415,17 @@
 </main>
 
 <!-- =================================================================
-     6. LÓGICA DEL SISTEMA: LIBROS, GUÍA INTERACTIVA Y FORMSPREE
+     6. LÓGICA DEL SISTEMA: LIBROS, GUÍA, FORMSPREE Y EDITOR GITHUB
      ================================================================= -->
 <script>
+  const GITHUB_OWNER = "Biblia-Estudio";
+  const GITHUB_REPO = "Biblia-estudio";
+  const ESTUDIOS_FILE = "estudios.json";
+
+  let ESTUDIOS_DB = {};
+  let LIBRO_ACTUAL_DATOS = null;
+  let CODIGO_LIBRO_ACTUAL = "";
+
   // Catálogo oficial ordenado de los 66 libros divididos por Testamento
   const CATALOGO = {
     "Antiguo Testamento": [
@@ -346,7 +448,6 @@
     ]
   };
 
-  // Mapa rápido de código de libro a su carpeta correspondiente
   const RUTA_LIBRO = {};
   const selLibro = document.getElementById('sel-libro');
   const selCap = document.getElementById('sel-cap');
@@ -365,7 +466,7 @@
     selLibro.appendChild(grupo);
   });
 
-// Selección temática independiente y 100% libre de derechos editoriales de terceros
+  // Selección temática independiente y 100% libre de derechos editoriales de terceros
   const GUIA_TEMATICA = [
     {
       categoria: "1. Fe, Gracia y Camino Espiritual",
@@ -453,514 +554,4 @@
       ]
     },
     {
-      categoria: "2. Paz Interior, Emociones y Fortaleza",
-      temas: [
-        {
-          titulo: "Paz de Dios frente a la ansiedad y preocupación",
-          citas: [
-            ["Salmos 55:22", "PSA", 55, 22, 22],
-            ["Salmos 94:18-19", "PSA", 94, 18, 19],
-            ["Mateo 6:25-34", "MAT", 6, 25, 34],
-            ["Juan 14:27", "JHN", 14, 27, 27],
-            ["Filipenses 4:6-7", "PHP", 4, 6, 7],
-            ["1 Pedro 5:6-7", "1PE", 5, 6, 7]
-          ]
-        },
-        {
-          titulo: "Valentía y amparo para vencer el miedo",
-          citas: [
-            ["Deuteronomio 31:6", "DEU", 31, 6, 6],
-            ["Josué 1:9", "JOS", 1, 9, 9],
-            ["Salmos 27:1-3", "PSA", 27, 1, 3],
-            ["Salmos 56:3-4", "PSA", 56, 3, 4],
-            ["Isaías 41:10", "ISA", 41, 10, 10],
-            ["2 Timoteo 1:7", "2TI", 1, 7, 7]
-          ]
-        },
-        {
-          titulo: "Consuelo en tiempos de tristeza y quebranto",
-          citas: [
-            ["Salmos 34:17-18", "PSA", 34, 17, 18],
-            ["Salmos 42:5-11", "PSA", 42, 5, 11],
-            ["Salmos 147:3", "PSA", 147, 3, 3],
-            ["Mateo 5:4", "MAT", 5, 4, 4],
-            ["2 Corintios 1:3-5", "2CO", 1, 3, 5]
-          ]
-        },
-        {
-          titulo: "Descanso y nuevas fuerzas en el agotamiento",
-          citas: [
-            ["Éxodo 33:14", "EXO", 33, 14, 14],
-            ["Salmos 62:1-2", "PSA", 62, 1, 2],
-            ["Isaías 40:28-31", "ISA", 40, 28, 31],
-            ["Mateo 11:28-30", "MAT", 11, 28, 30],
-            ["Gálatas 6:9", "GAL", 6, 9, 9]
-          ]
-        },
-        {
-          titulo: "Compañía de Dios cuando nos sentimos solos",
-          citas: [
-            ["Salmos 23:1-6", "PSA", 23, 1, 6],
-            ["Salmos 27:10", "PSA", 27, 10, 10],
-            ["Salmos 139:7-12", "PSA", 139, 7, 12],
-            ["Isaías 43:1-2", "ISA", 43, 1, 2],
-            ["Mateo 28:20", "MAT", 28, 20, 20],
-            ["Hebreos 13:5", "HEB", 13, 5, 5]
-          ]
-        },
-        {
-          titulo: "Dominio propio frente al enojo y la ira",
-          citas: [
-            ["Salmos 37:8", "PSA", 37, 8, 8],
-            ["Proverbios 15:1", "PRO", 15, 1, 1],
-            ["Proverbios 16:32", "PRO", 16, 32, 32],
-            ["Eclesiastés 7:9", "ECC", 7, 9, 9],
-            ["Efesios 4:26-27", "EPH", 4, 26, 27],
-            ["Santiago 1:19-20", "JAS", 1, 19, 20]
-          ]
-        },
-        {
-          titulo: "Paciencia para saber esperar el tiempo de Dios",
-          citas: [
-            ["Salmos 27:14", "PSA", 27, 14, 14],
-            ["Salmos 40:1-2", "PSA", 40, 1, 2],
-            ["Eclesiastés 3:1-11", "ECC", 3, 1, 11],
-            ["Lamentaciones 3:25-26", "LAM", 3, 25, 26],
-            ["Romanos 8:25", "ROM", 8, 25, 25],
-            ["Santiago 5:7-8", "JAS", 5, 7, 8]
-          ]
-        },
-        {
-          titulo: "Identidad, valor personal y seguridad en Dios",
-          citas: [
-            ["Génesis 1:27", "GEN", 1, 27, 27],
-            ["Salmos 139:13-16", "PSA", 139, 13, 16],
-            ["Jeremías 31:3", "JER", 31, 3, 3],
-            ["Efesios 1:4-6", "EPH", 1, 4, 6],
-            ["1 Pedro 2:9", "1PE", 2, 9, 9]
-          ]
-        },
-        {
-          titulo: "Sanar de la envidia, los celos y la comparación",
-          citas: [
-            ["Salmos 37:1-7", "PSA", 37, 1, 7],
-            ["Proverbios 14:30", "PRO", 14, 30, 30],
-            ["1 Corintios 13:4-7", "1CO", 13, 4, 7],
-            ["Gálatas 5:25-26", "GAL", 5, 25, 26],
-            ["Santiago 3:14-16", "JAS", 3, 14, 16]
-          ]
-        },
-        {
-          titulo: "Esperanza viva frente al futuro",
-          citas: [
-            ["Salmos 31:14-15", "PSA", 31, 14, 15],
-            ["Proverbios 23:17-18", "PRO", 23, 17, 18],
-            ["Jeremías 29:11", "JER", 29, 11, 11],
-            ["Romanos 15:13", "ROM", 15, 13, 13],
-            ["Hebreos 10:23", "HEB", 10, 23, 23]
-          ]
-        }
-      ]
-    },
-    {
-      categoria: "3. Pruebas, Salud y Circunstancias Difíciles",
-      temas: [
-        {
-          titulo: "Esperanza y sostén en la enfermedad",
-          citas: [
-            ["Éxodo 15:26", "EXO", 15, 26, 26],
-            ["Salmos 41:1-3", "PSA", 41, 1, 3],
-            ["Salmos 103:1-5", "PSA", 103, 1, 5],
-            ["Jeremías 17:14", "JER", 17, 14, 14],
-            ["Santiago 5:14-15", "JAS", 5, 14, 15]
-          ]
-        },
-        {
-          titulo: "Consuelo ante el duelo y la partida de un ser querido",
-          citas: [
-            ["Salmos 23:4", "PSA", 23, 4, 4],
-            ["Salmos 116:15", "PSA", 116, 15, 15],
-            ["Juan 11:25-26", "JHN", 11, 25, 26],
-            ["Juan 14:1-3", "JHN", 14, 1, 3],
-            ["1 Tesalonicenses 4:13-14", "1TH", 4, 13, 14],
-            ["Apocalipsis 21:4", "REV", 21, 4, 4]
-          ]
-        },
-        {
-          titulo: "Victoria sobre la muerte y promesa de vida eterna",
-          citas: [
-            ["Isaías 25:8", "ISA", 25, 8, 8],
-            ["Juan 5:24", "JHN", 5, 24, 24],
-            ["Romanos 8:38-39", "ROM", 8, 38, 39],
-            ["1 Corintios 15:54-57", "1CO", 15, 54, 57],
-            ["Filipenses 1:21-23", "PHP", 1, 21, 23]
-          ]
-        },
-        {
-          titulo: "Sabiduría de lo alto para tomar decisiones difíciles",
-          citas: [
-            ["Salmos 32:8", "PSA", 32, 8, 8],
-            ["Proverbios 3:5-6", "PRO", 3, 5, 6],
-            ["Proverbios 15:22", "PRO", 15, 22, 22],
-            ["Isaías 30:21", "ISA", 30, 21, 21],
-            ["Santiago 1:5", "JAS", 1, 5, 5]
-          ]
-        },
-        {
-          titulo: "Fortaleza en medio del sufrimiento y la adversidad",
-          citas: [
-            ["Salmos 46:1-3", "PSA", 46, 1, 3],
-            ["Romanos 5:3-5", "ROM", 5, 3, 5],
-            ["Romanos 8:18", "ROM", 8, 18, 18],
-            ["2 Corintios 4:8-10", "2CO", 4, 8, 10],
-            ["2 Corintios 12:9-10", "2CO", 12, 9, 10],
-            ["1 Pedro 1:6-7", "1PE", 1, 6, 7]
-          ]
-        },
-        {
-          titulo: "Confianza en la provisión ante crisis económicas o laborales",
-          citas: [
-            ["Salmos 37:25", "PSA", 37, 25, 25],
-            ["Habacuc 3:17-19", "HAB", 3, 17, 19],
-            ["Mateo 6:31-33", "MAT", 6, 31, 33],
-            ["Filipenses 4:11-13", "PHP", 4, 11, 13],
-            ["Filipenses 4:19", "PHP", 4, 19, 19]
-          ]
-        },
-        {
-          titulo: "Refugio ante la injusticia, calumnias o persecución",
-          citas: [
-            ["Salmos 9:9-10", "PSA", 9, 9, 10],
-            ["Salmos 37:5-6", "PSA", 37, 5, 6],
-            ["Mateo 5:10-12", "MAT", 5, 10, 12],
-            ["Romanos 12:19-21", "ROM", 12, 19, 21],
-            ["1 Pedro 3:14-17", "1PE", 3, 14, 17]
-          ]
-        },
-        {
-          titulo: "Libertad frente a la tentación y las ataduras",
-          citas: [
-            ["Salmos 119:9-11", "PSA", 119, 9, 11],
-            ["Juan 8:31-36", "JHN", 8, 31, 36],
-            ["1 Corintios 6:12", "1CO", 6, 12, 12],
-            ["1 Corintios 10:13", "1CO", 10, 13, 13],
-            ["Gálatas 5:1", "GAL", 5, 1, 1],
-            ["Santiago 4:7-8", "JAS", 4, 7, 8]
-          ]
-        },
-        {
-          titulo: "Protección divina en peligros y emergencias",
-          citas: [
-            ["Salmos 91:1-16", "PSA", 91, 1, 16],
-            ["Salmos 121:1-8", "PSA", 121, 1, 8],
-            ["Proverbios 18:10", "PRO", 18, 10, 10],
-            ["Nahúm 1:7", "NAM", 1, 7, 7]
-          ]
-        }
-      ]
-    },
-    {
-      categoria: "4. Familia, Relaciones y Vida Cotidiana",
-      temas: [
-        {
-          titulo: "Amor, unidad y fidelidad en el matrimonio",
-          citas: [
-            ["Génesis 2:24", "GEN", 2, 24, 24],
-            ["Eclesiastés 4:9-12", "ECC", 4, 9, 12],
-            ["1 Corintios 13:4-8", "1CO", 13, 4, 8],
-            ["Efesios 5:25-33", "EPH", 5, 25, 33],
-            ["Colosenses 3:14", "COL", 3, 14, 14]
-          ]
-        },
-        {
-          titulo: "Sabiduría para educar y guiar a los hijos",
-          citas: [
-            ["Deuteronomio 6:6-7", "DEU", 6, 6, 7],
-            ["Salmos 127:3-5", "PSA", 127, 3, 5],
-            ["Proverbios 22:6", "PRO", 22, 6, 6],
-            ["Efesios 6:4", "EPH", 6, 4, 4]
-          ]
-        },
-        {
-          titulo: "Honra a los padres y cuidado de los adultos mayores",
-          citas: [
-            ["Éxodo 20:12", "EXO", 20, 12, 12],
-            ["Levítico 19:32", "LEV", 19, 32, 32],
-            ["Proverbios 23:22", "PRO", 23, 22, 22],
-            ["Isaías 46:4", "ISA", 46, 4, 4],
-            ["Efesios 6:1-3", "EPH", 6, 1, 3]
-          ]
-        },
-        {
-          titulo: "El valor de la amistad sincera y el compañerismo",
-          citas: [
-            ["Proverbios 17:17", "PRO", 17, 17, 17],
-            ["Proverbios 27:9", "PRO", 27, 9, 9],
-            ["Proverbios 27:17", "PRO", 27, 17, 17],
-            ["Juan 15:12-15", "JHN", 15, 12, 15],
-            ["Gálatas 6:2", "GAL", 6, 2, 2]
-          ]
-        },
-        {
-          titulo: "Perdonar las ofensas y buscar la paz con los demás",
-          citas: [
-            ["Mateo 6:14-15", "MAT", 6, 14, 15],
-            ["Mateo 18:21-22", "MAT", 18, 21, 22],
-            ["Marcos 11:25", "MRK", 11, 25, 25],
-            ["Romanos 12:18", "ROM", 12, 18, 18],
-            ["Efesios 4:31-32", "EPH", 4, 31, 32],
-            ["Colosenses 3:12-13", "COL", 3, 12, 13]
-          ]
-        },
-        {
-          titulo: "Prudencia en el hablar y cuidado de nuestras palabras",
-          citas: [
-            ["Salmos 141:3", "PSA", 141, 3, 3],
-            ["Proverbios 10:19", "PRO", 10, 19, 19],
-            ["Proverbios 18:21", "PRO", 18, 21, 21],
-            ["Efesios 4:29", "EPH", 4, 29, 29],
-            ["Santiago 3:2-10", "JAS", 3, 2, 10]
-          ]
-        },
-        {
-          titulo: "Humildad, empatía y trato sin acepción de personas",
-          citas: [
-            ["Miqueas 6:8", "MIC", 6, 8, 8],
-            ["Mateo 7:12", "MAT", 7, 12, 12],
-            ["Romanos 12:10", "ROM", 12, 10, 10],
-            ["Filipenses 2:3-4", "PHP", 2, 3, 4],
-            ["Santiago 2:1-9", "JAS", 2, 1, 9]
-          ]
-        },
-        {
-          titulo: "Trabajo diligente, estudios y nuevos comienzos",
-          citas: [
-            ["Salmos 90:12", "PSA", 90, 12, 12],
-            ["Proverbios 16:3", "PRO", 16, 3, 3],
-            ["Eclesiastés 9:10", "ECC", 9, 10, 10],
-            ["Efesios 5:15-16", "EPH", 5, 15, 16],
-            ["Colosenses 3:23-24", "COL", 3, 23, 24]
-          ]
-        },
-        {
-          titulo: "Contentamiento, generosidad y desapego del dinero",
-          citas: [
-            ["Proverbios 11:24-25", "PRO", 11, 24, 25],
-            ["Mateo 6:19-21", "MAT", 6, 19, 21],
-            ["2 Corintios 9:6-8", "2CO", 9, 6, 8],
-            ["1 Timoteo 6:6-10", "1TI", 6, 6, 10],
-            ["Hebreos 13:5", "HEB", 13, 5, 5]
-          ]
-        }
-      ]
-    }
-  ];
-  // Renderizar la Guía Temática en pantalla
-  function renderizarGuiaTemas(filtro = "") {
-    const contenedor = document.getElementById('contenedor-guia');
-    const q = filtro.toLowerCase().trim();
-    contenedor.innerHTML = "";
-
-    GUIA_TEMATICA.forEach(bloque => {
-      const temasFiltrados = bloque.temas.filter(t => 
-        !q || t.titulo.toLowerCase().includes(q) || bloque.categoria.toLowerCase().includes(q) ||
-        t.citas.some(c => c[0].toLowerCase().includes(q))
-      );
-
-      if (temasFiltrados.length === 0) return;
-
-      const seccion = document.createElement('div');
-      seccion.className = 'guia-categoria';
-      seccion.innerHTML = `<h2>${bloque.categoria}</h2>`;
-
-      const grid = document.createElement('div');
-      grid.className = 'guia-grid';
-
-      temasFiltrados.forEach(tema => {
-        const card = document.createElement('div');
-        card.className = 'guia-card';
-
-        const botonesCitas = tema.citas.map(([etiqueta, cod, cap, vIni, vFin]) => 
-          `<button class="cita-link" onclick="irAPasaje('${cod}', ${cap}, ${vIni}, ${vFin})">${etiqueta}</button>`
-        ).join('');
-
-        card.innerHTML = `
-          <h3>${tema.titulo}</h3>
-          <div class="citas-lista">${botonesCitas}</div>
-        `;
-        grid.appendChild(card);
-      });
-
-      seccion.appendChild(grid);
-      contenedor.appendChild(seccion);
-    });
-  }
-
-  function filtrarGuiaTemas(valor) {
-    renderizarGuiaTemas(valor);
-  }
-
-  function abrirGuiaTemas() {
-    switchView('help-view');
-    selLibro.value = "GUIA_TEMAS";
-    selCap.innerHTML = '<option value="">Ir al capítulo...</option>';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  function manejarSeleccionLibro(valor) {
-    if (!valor) return;
-    if (valor === "GUIA_TEMAS") {
-      abrirGuiaTemas();
-    } else {
-      switchView('reading-view');
-      cambiarLibro(valor);
-    }
-  }
-
-  function switchView(viewId) {
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    document.getElementById(viewId).classList.add('active');
-  }
-
-  function irAInicio() {
-    switchView('home-view');
-    selLibro.value = "";
-    selCap.innerHTML = '<option value="">Ir al capítulo...</option>';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
-
-  async function cambiarLibro(ruta, hacerScrollArriba = true) {
-    const contenedor = document.getElementById('lector');
-    contenedor.innerHTML = '<p>Cargando libro...</p>';
-    selCap.innerHTML = '<option value="">Ir al capítulo...</option>';
-
-    try {
-      const resp = await fetch(`${ruta}.json`);
-      if (!resp.ok) throw new Error('Aún no subido');
-      const datos = await resp.json();
-      renderizarLibro(datos);
-      if (hacerScrollArriba) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } catch (e) {
-      contenedor.innerHTML = `<p>Para ver este libro, sube el archivo <strong>${ruta}.json</strong> a tu repositorio.</p>`;
-    }
-  }
-
-  function renderizarLibro(libro) {
-    const contenedor = document.getElementById('lector');
-    contenedor.innerHTML = `<span class="testamento-badge">${libro.testamento}</span>`;
-
-    Object.entries(libro.capitulos).forEach(([numCap, versiculos]) => {
-      selCap.innerHTML += `<option value="cap-${numCap}">Capítulo ${numCap}</option>`;
-
-      const versHtml = versiculos.map((t, i) =>
-        `<p class="versiculo" id="cap-${numCap}-v-${i + 1}"><span class="num">${i + 1}</span>${t}</p>`
-      ).join('');
-
-      contenedor.innerHTML += `
-        <section class="capitulo" id="cap-${numCap}">
-          <h2>${libro.nombre} ${numCap}</h2>
-          ${versHtml}
-          <details class="estudio">
-            <summary title="Más información"><span class="triangulo">▶</span></summary>
-            <div class="estudio-cuerpo"></div>
-          </details>
-        </section>`;
-    });
-  }
-
-  // Salto directo desde la Guía Temática hacia el libro, capítulo y rango de versículos exacto
-  async function irAPasaje(codigoLibro, numCap, vInicio, vFin) {
-    const ruta = RUTA_LIBRO[codigoLibro];
-    if (!ruta) return;
-
-    switchView('reading-view');
-    selLibro.value = ruta;
-    await cambiarLibro(ruta, false);
-    selCap.value = `cap-${numCap}`;
-
-    setTimeout(() => {
-      document.querySelectorAll('.versiculo.destacado').forEach(v => v.classList.remove('destacado'));
-
-      for (let v = vInicio; v <= vFin; v++) {
-        const versEl = document.getElementById(`cap-${numCap}-v-${v}`);
-        if (versEl) versEl.classList.add('destacado');
-      }
-
-      const primerVers = document.getElementById(`cap-${numCap}-v-${vInicio}`) || document.getElementById(`cap-${numCap}`);
-      if (primerVers) {
-        primerVers.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 80);
-  }
-
-  function irACapitulo(idCap) {
-    if (!idCap) return;
-    setTimeout(() => {
-      const el = document.getElementById(idCap);
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
-    }, 50);
-  }
-
-  function filtrarTexto(q) {
-    const texto = q.toLowerCase().trim();
-    if (texto.length > 0) {
-      switchView('reading-view');
-    }
-    document.querySelectorAll('.versiculo').forEach(v => {
-      const coincide = texto.length > 2 && v.textContent.toLowerCase().includes(texto);
-      v.classList.toggle('destacado', coincide);
-    });
-  }
-
-  async function sendFeedback() {
-    const campo = document.getElementById('user-feedback');
-    const boton = document.getElementById('btn-feedback');
-    const feedbackText = campo.value.trim();
-
-    if (feedbackText === "") {
-        alert("Por favor escribe una sugerencia antes de enviar.");
-        return;
-    }
-
-    boton.disabled = true;
-    boton.textContent = "Enviando...";
-
-    try {
-        const respuesta = await fetch("https://formspree.io/f/xnppojeb", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Accept": "application/json"
-            },
-            body: JSON.stringify({ sugerencia_anonima: feedbackText })
-        });
-
-        if (respuesta.ok) {
-            alert("¡Muchas gracias! Tu sugerencia anónima ha sido enviada con éxito.");
-            campo.value = "";
-        } else {
-            alert("Hubo un problema al enviar. Inténtalo de nuevo más tarde.");
-        }
-    } catch (error) {
-        alert("Error de conexión al enviar la sugerencia.");
-    } finally {
-        boton.disabled = false;
-        boton.textContent = "Enviar sugerencia";
-    }
-  }
-
-  // Inicializar la guía temática al cargar la página
-  renderizarGuiaTemas();
-</script>
-
-<!-- =================================================================
-     7. CONTADOR DE VISITAS ANÓNIMO Y SIN COOKIES (GOATCOUNTER)
-     ================================================================= -->
-<script data-goatcounter="https://biblia-estudio.goatcounter.com/count"
-        async src="//gc.zgo.at/count.js"></script>
-</body>
-</html>
+     
