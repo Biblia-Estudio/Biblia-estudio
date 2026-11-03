@@ -484,6 +484,82 @@
         font-size: 0.82rem;
         cursor: pointer;
     }
+    /* Panel desplegable de sugerencias tipo Google para el buscador superior */
+    .buscador-wrapper {
+        position: relative;
+        flex: 1;
+        min-width: 260px;
+        max-width: 420px;
+    }
+
+    .buscador-wrapper input[type="search"] {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .resultados-google {
+        position: absolute;
+        top: calc(100% + 6px);
+        right: 0;
+        left: 0;
+        background: var(--card-bg);
+        border: 1px solid var(--borde);
+        border-radius: 8px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+        max-height: 420px;
+        overflow-y: auto;
+        z-index: 2000;
+        display: none;
+        font-family: system-ui, sans-serif;
+    }
+
+    .resultados-google.activo {
+        display: block;
+    }
+
+    .resultado-item {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--borde);
+        cursor: pointer;
+        transition: background 0.15s;
+        text-align: left;
+    }
+
+    .resultado-item:last-child {
+        border-bottom: none;
+    }
+
+    .resultado-item:hover {
+        background: var(--panel);
+    }
+
+    .resultado-cita {
+        font-weight: 700;
+        color: var(--accent-color);
+        font-size: 0.88rem;
+        margin-bottom: 3px;
+        display: block;
+    }
+
+    .resultado-extracto {
+        font-size: 0.85rem;
+        color: var(--txt);
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .resultado-extracto mark {
+        background: var(--resalte);
+        padding: 0 2px;
+        border-radius: 2px;
+    }
+
+    .buscador-estado {
+        padding: 12px 14px;
+        font-size: 0.86rem;
+        color: #666;
+        text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -505,8 +581,9 @@
       <option value="">Ir al capítulo...</option>
     </select>
   </div>
-  <div>
-    <input type="search" id="buscador" placeholder="Buscar versículo o palabra en este libro..." oninput="filtrarTexto(this.value)">
+<div class="buscador-wrapper" id="contenedor-buscador">
+    <input type="search" id="buscador" autocomplete="off" placeholder="Buscar frase o cita (ej. Juan 3:16, paz...)" oninput="filtrarTexto(this.value)" onfocus="if(this.value.trim().length > 1) filtrarTexto(this.value)">
+    <div id="resultados-busqueda" class="resultados-google"></div>
   </div>
 </header>
 
@@ -1642,15 +1719,181 @@
     }, 50);
   }
 
-  function filtrarTexto(q) {
-    const texto = q.toLowerCase().trim();
-    if (texto.length > 0) {
-      switchView('reading-view');
+// Memoria caché de los libros para búsqueda instantánea tipo Google
+  const CACHE_BIBLIA_COMPLETA = {};
+  let CARGANDO_BIBLIA_BUSQUEDA = false;
+  let TEMPORIZADOR_BUSQUEDA = null;
+
+  function normalizarTextoBusqueda(txt) {
+    return String(txt || "")
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+  }
+
+  // Detectar si el lector escribió una cita bíblica como "Juan 3:16", "San Juan 3:16-18" o "Genesis 1"
+  function interpretarCitaBiblica(consulta) {
+    const limpia = normalizarTextoBusqueda(consulta).replace(/\s+/g, " ");
+    const match = limpia.match(/^([1-3]?\s*[a-z]+(?:\s+[a-z]+)?)\s+(\d+)(?:[:.,\s](\d+)(?:\s*-\s*(\d+))?)?$/);
+    if (!match) return null;
+
+    const nombreEscrito = match[1].trim();
+    const cap = parseInt(match[2], 10);
+    const vIni = match[3] ? parseInt(match[3], 10) : 1;
+    const vFin = match[4] ? parseInt(match[4], 10) : vIni;
+
+    for (const [, libros] of Object.entries(CATALOGO)) {
+      for (const [cod, nombreOficial] of libros) {
+        const nomNorm = normalizarTextoBusqueda(nombreOficial);
+        const sinSan = nomNorm.replace(/^san\s+/, "");
+        if (nomNorm === nombreEscrito || sinSan === nombreEscrito || nomNorm.startsWith(nombreEscrito) || sinSan.startsWith(nombreEscrito)) {
+          return { codigo: cod, nombre: nombreOficial, cap, vIni, vFin, tieneVersiculo: Boolean(match[3]) };
+        }
+      }
     }
-    document.querySelectorAll('.versiculo').forEach(v => {
-      const coincide = texto.length > 2 && v.textContent.toLowerCase().includes(texto);
-      v.classList.toggle('destacado', coincide);
+    return null;
+  }
+
+  // Descargar en segundo plano los libros disponibles para buscar frases en toda la Biblia
+  async function asegurarIndiceBiblia() {
+    if (CARGANDO_BIBLIA_BUSQUEDA) return;
+    CARGANDO_BIBLIA_BUSQUEDA = true;
+
+    const promesas = [];
+    Object.values(CATALOGO).forEach(lista => {
+      lista.forEach(([cod, nombre]) => {
+        if (CACHE_BIBLIA_COMPLETA[cod]) return;
+        const ruta = RUTA_LIBRO[cod];
+        const p = fetch(`${ruta}.json`)
+          .then(r => r.ok ? r.json() : null)
+          .then(datos => {
+            if (datos && datos.capitulos) {
+              CACHE_BIBLIA_COMPLETA[cod] = { nombre: datos.nombre || nombre, capitulos: datos.capitulos };
+            }
+          })
+          .catch(() => {});
+        promesas.push(p);
+      });
     });
+
+    await Promise.all(promesas);
+    CARGANDO_BIBLIA_BUSQUEDA = false;
+  }
+
+  function cerrarResultadosBusqueda() {
+    const panel = document.getElementById('resultados-busqueda');
+    if (panel) panel.classList.remove('activo');
+  }
+
+  document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('contenedor-buscador');
+    if (wrap && !wrap.contains(e.target)) {
+      cerrarResultadosBusqueda();
+    }
+  });
+
+  function abrirResultadoBusqueda(cod, cap, vIni, vFin) {
+    cerrarResultadosBusqueda();
+    irAPasaje(cod, cap, vIni, vFin);
+  }
+
+  function filtrarTexto(q) {
+    const panel = document.getElementById('resultados-busqueda');
+    const textoOriginal = q.trim();
+
+    if (textoOriginal.length < 2) {
+      cerrarResultadosBusqueda();
+      document.querySelectorAll('.versiculo.destacado').forEach(v => v.classList.remove('destacado'));
+      return;
+    }
+
+    clearTimeout(TEMPORIZADOR_BUSQUEDA);
+    TEMPORIZADOR_BUSQUEDA = setTimeout(async () => {
+      if (panel) {
+        panel.classList.add('activo');
+        panel.innerHTML = `<div class="buscador-estado">🔍 Buscando coincidencias en la Biblia...</div>`;
+      }
+
+      // 1. Verificar primero si el usuario escribió una referencia directa (ej. "Juan 3:16" o "Salmos 23:1")
+      const cita = interpretarCitaBiblica(textoOriginal);
+      await asegurarIndiceBiblia();
+
+      const resultadosHTML = [];
+
+      if (cita) {
+        const libroCache = CACHE_BIBLIA_COMPLETA[cita.codigo];
+        const versiculosCap = libroCache && libroCache.capitulos ? libroCache.capitulos[cita.cap] : null;
+
+        if (versiculosCap) {
+          const textoVers = versiculosCap[cita.vIni - 1] || "Ir al capítulo completo...";
+          const etiquetaCita = cita.tieneVersiculo
+            ? `${cita.nombre} ${cita.cap}:${cita.vIni}${cita.vFin > cita.vIni ? '-' + cita.vFin : ''}`
+            : `${cita.nombre} ${cita.cap}`;
+
+          resultadosHTML.push(`
+            <div class="resultado-item" onclick="abrirResultadoBusqueda('${cita.codigo}', ${cita.cap}, ${cita.vIni}, ${cita.vFin})">
+              <span class="resultado-cita">📖 Ir directo a ${etiquetaCita}</span>
+              <p class="resultado-extracto">${escaparHTML(textoVers)}</p>
+            </div>
+          `);
+        }
+      }
+
+      // 2. Buscar coincidencias de palabras o frases escritas en todos los libros
+      const consultaNorm = normalizarTextoBusqueda(textoOriginal);
+      const palabras = consultaNorm.split(/\s+/).filter(w => w.length >= 2);
+      let contador = 0;
+      const LIMITE_RESULTADOS = 35;
+
+      if (palabras.length > 0) {
+        for (const [, libros] of Object.entries(CATALOGO)) {
+          for (const [cod] of libros) {
+            const libroData = CACHE_BIBLIA_COMPLETA[cod];
+            if (!libroData || !libroData.capitulos) continue;
+
+            for (const [numCap, listaVers] of Object.entries(libroData.capitulos)) {
+              for (let i = 0; i < listaVers.length; i++) {
+                const vTexto = listaVers[i];
+                const vNorm = normalizarTextoBusqueda(vTexto);
+
+                // Coincidencia de frase exacta o de todas las palabras buscadas
+                const coincide = vNorm.includes(consultaNorm) || palabras.every(p => vNorm.includes(p));
+                if (coincide) {
+                  const numV = i + 1;
+                  let extractoSeguro = escaparHTML(vTexto);
+                  palabras.forEach(pal => {
+                    const regex = new RegExp(`(${pal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+                    extractoSeguro = extractoSeguro.replace(regex, '<mark>$1</mark>');
+                  });
+
+                  resultadosHTML.push(`
+                    <div class="resultado-item" onclick="abrirResultadoBusqueda('${cod}', ${numCap}, ${numV}, ${numV})">
+                      <span class="resultado-cita">${libroData.nombre} ${numCap}:${numV}</span>
+                      <p class="resultado-extracto">${extractoSeguro}</p>
+                    </div>
+                  `);
+
+                  contador++;
+                  if (contador >= LIMITE_RESULTADOS) break;
+                }
+              }
+              if (contador >= LIMITE_RESULTADOS) break;
+            }
+            if (contador >= LIMITE_RESULTADOS) break;
+          }
+          if (contador >= LIMITE_RESULTADOS) break;
+        }
+      }
+
+      if (panel) {
+        if (resultadosHTML.length > 0) {
+          panel.innerHTML = resultadosHTML.join('');
+        } else {
+          panel.innerHTML = `<div class="buscador-estado">No se encontraron versículos para "${escaparHTML(textoOriginal)}".</div>`;
+        }
+      }
+    }, 180);
   }
 
   async function sendFeedback() {
