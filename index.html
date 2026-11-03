@@ -566,7 +566,7 @@
 </main>
 
 <!-- =================================================================
-     6. LÓGICA DEL SISTEMA: LIBROS, GUÍA, SEGURIDAD VOLÁTIL Y TRIÁNGULO
+     6. LÓGICA DEL SISTEMA: LECTURA EN TIEMPO REAL Y SEGURIDAD VOLÁTIL
      ================================================================= -->
 <script>
   const GITHUB_OWNER = "Biblia-Estudio";
@@ -1020,15 +1020,41 @@
     }
   ];
 
-  // Cargar los estudios publicados en tiempo real sin caché para todos los lectores
+  // LECTURA EN TIEMPO REAL PARA TODOS LOS LECTORES:
+  // Consulta directamente la API en vivo de GitHub para que nunca desaparezcan los artículos por caché
   async function cargarEstudiosPublicos() {
     try {
-      const rawUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${ESTUDIOS_FILE}?t=${Date.now()}`;
-      const resp = await fetch(rawUrl, { cache: "no-store" });
+      const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${ESTUDIOS_FILE}?t=${Date.now()}`;
+      const headers = {
+        "Accept": "application/vnd.github.raw+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+      };
+      if (TOKEN_VOLATIL) {
+        headers["Authorization"] = `Bearer ${TOKEN_VOLATIL}`;
+      }
+
+      const resp = await fetch(apiUrl, { headers, cache: "no-store" });
       if (resp.ok) {
-        ESTUDIOS_DB = await resp.json();
+        const datos = await resp.json();
+        ESTUDIOS_DB = datos;
+        try { sessionStorage.setItem('biblia_estudios_cache', JSON.stringify(datos)); } catch (e) {}
+        return;
+      } else if (resp.status === 404) {
+        ESTUDIOS_DB = {};
         return;
       }
+    } catch (e) {}
+
+    // Respaldo inmediato si el lector recarga la página en menos de 1 segundo
+    try {
+      const guardadoLocal = sessionStorage.getItem('biblia_estudios_cache');
+      if (guardadoLocal) {
+        ESTUDIOS_DB = JSON.parse(guardadoLocal);
+        return;
+      }
+    } catch (e) {}
+
+    try {
       const fallback = await fetch(`${ESTUDIOS_FILE}?t=${Date.now()}`, { cache: "no-store" });
       if (fallback.ok) {
         ESTUDIOS_DB = await fallback.json();
@@ -1216,12 +1242,14 @@
     return html;
   }
 
-  // Construir el triángulo desplegable para el lector (solo si hay publicaciones) y para el editor (siempre)
+  // Construir el triángulo desplegable:
+  // - LECTOR: Solo ve el triángulo si hay artículos publicados, y adentro SOLO ve lo que publicó el editor.
+  // - EDITOR: Ve el triángulo en todos los capítulos para poder publicar, editar o eliminar.
   function construirTrianguloCapitulo(claveCap, tituloSeccion) {
     const modoEditor = esEditorActivo();
     const listaEstudios = ESTUDIOS_DB[claveCap] || [];
 
-    // Si es un lector normal y no hay estudios publicados en este capítulo, no se muestra nada
+    // Regla estricta: si es lector y no hay publicaciones en este capítulo, no se muestra ni la flechita
     if (listaEstudios.length === 0 && !modoEditor) {
       return '';
     }
@@ -1289,7 +1317,6 @@
     `;
   }
 
-  // Cargar los datos de una publicación existente dentro del formulario para editarla
   function cargarEnEditor(claveCap, idEstudio) {
     const lista = ESTUDIOS_DB[claveCap] || [];
     const item = lista.find(x => x.id === idEstudio);
@@ -1398,6 +1425,7 @@
       delete IMAGENES_TEMP[claveCap];
 
       const jsonStr = JSON.stringify(ESTUDIOS_DB, null, 2);
+      try { sessionStorage.setItem('biblia_estudios_cache', jsonStr); } catch (e) {}
       const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
 
       const body = {
@@ -1438,6 +1466,7 @@
       }
 
       const jsonStr = JSON.stringify(ESTUDIOS_DB, null, 2);
+      try { sessionStorage.setItem('biblia_estudios_cache', jsonStr); } catch (e) {}
       const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
 
       const putResp = await fetch(apiUrl, {
