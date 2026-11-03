@@ -885,7 +885,7 @@
     }
   }
 
-function configurarModoEditor() {
+async function configurarModoEditor() {
     if (esEditorActivo()) {
       if (confirm("¿Deseas cerrar la sesión de Modo Editor en este navegador?")) {
         localStorage.removeItem('biblia_gh_token');
@@ -896,16 +896,59 @@ function configurarModoEditor() {
       return;
     }
 
-    const token = prompt("Ingresa tu Token privado de GitHub (solo para editores autorizados):");
-    if (!token || !token.trim()) return;
+    const tokenInput = prompt("Ingresa tu Token privado de GitHub (solo para editores autorizados):");
+    if (!tokenInput || !tokenInput.trim()) return;
+    const token = tokenInput.trim();
 
-    localStorage.setItem('biblia_gh_token', token.trim());
-    localStorage.setItem('biblia_gh_autor', "Estudio Bíblico");
-    actualizarBotonEditor();
-    alert("¡Modo Editor activado! Ahora verás la caja para publicar estudios debajo de cada capítulo.");
-    if (LIBRO_ACTUAL_DATOS) renderizarLibro(LIBRO_ACTUAL_DATOS);
+    // 1. Filtro rápido de formato: los tokens reales de GitHub siempre empiezan con github_pat_ o ghp_
+    if (!token.startsWith("github_pat_") && !token.startsWith("ghp_")) {
+      alert("❌ Acceso denegado: El código ingresado no es un Token válido de GitHub.");
+      return;
+    }
+
+    const btn = document.getElementById('btn-editor-login');
+    if (btn) btn.textContent = "⏳ Verificando llave con GitHub...";
+
+    try {
+      // 2. Verificación real con la API de GitHub y comprobación de permisos de escritura
+      const resp = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github+json"
+        }
+      });
+
+      const userResp = await fetch("https://api.github.com/user", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Accept": "application/vnd.github+json"
+        }
+      });
+
+      if (!resp.ok || !userResp.ok) {
+        throw new Error("Token inválido");
+      }
+
+      const repoData = await resp.json();
+      if (!repoData.permissions || !repoData.permissions.push) {
+        alert("❌ Acceso denegado: Este token no tiene permisos de edición en este repositorio.");
+        actualizarBotonEditor();
+        return;
+      }
+
+      const autor = prompt("¿Qué firma deseas mostrar en tus estudios? (Ej: Estudio Bíblico):", "Estudio Bíblico");
+
+      localStorage.setItem('biblia_gh_token', token);
+      localStorage.setItem('biblia_gh_autor', (autor || "Estudio Bíblico").trim());
+      actualizarBotonEditor();
+      alert("✅ ¡Llave verificada con éxito! Modo Editor activado.");
+      if (LIBRO_ACTUAL_DATOS) renderizarLibro(LIBRO_ACTUAL_DATOS);
+
+    } catch (e) {
+      alert("❌ Acceso denegado: La llave ingresada es incorrecta o fue revocada.");
+      actualizarBotonEditor();
+    }
   }
-
   // Guardar en vivo en el archivo estudios.json de GitHub usando la API oficial
   async function guardarEstudiosEnGitHub(mensajeCommit) {
     const token = localStorage.getItem('biblia_gh_token');
