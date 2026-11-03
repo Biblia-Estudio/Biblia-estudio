@@ -885,7 +885,7 @@
     }
   }
 
-  function configurarModoEditor() {
+function configurarModoEditor() {
     if (esEditorActivo()) {
       if (confirm("¿Deseas cerrar la sesión de Modo Editor en este navegador?")) {
         localStorage.removeItem('biblia_gh_token');
@@ -896,12 +896,11 @@
       return;
     }
 
-    const token = prompt("Ingresa tu Token privado de GitHub (solo para los 2 editores autorizados):");
+    const token = prompt("Ingresa tu Token privado de GitHub (solo para editores autorizados):");
     if (!token || !token.trim()) return;
-    const autor = prompt("¿Qué nombre o firma quieres mostrar en tus estudios? (Ej: Estudio Bíblico / Emanuel):", "Estudio Bíblico");
 
     localStorage.setItem('biblia_gh_token', token.trim());
-    localStorage.setItem('biblia_gh_autor', (autor || "Estudio Bíblico").trim());
+    localStorage.setItem('biblia_gh_autor', "Estudio Bíblico");
     actualizarBotonEditor();
     alert("¡Modo Editor activado! Ahora verás la caja para publicar estudios debajo de cada capítulo.");
     if (LIBRO_ACTUAL_DATOS) renderizarLibro(LIBRO_ACTUAL_DATOS);
