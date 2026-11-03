@@ -71,7 +71,7 @@
     /* Contenedor Principal y Vistas */
     main { 
         max-width: 850px; 
-        margin: 20px auto 80px auto; 
+        margin: 20px auto 40px auto; 
         padding: 24px 16px; 
     }
 
@@ -145,11 +145,6 @@
 
     .feedback-form button:hover {
         background-color: var(--accent-hover);
-    }
-
-    .feedback-form button:disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
     }
 
     /* Estilos de la Guía Temática de Versículos */
@@ -227,8 +222,8 @@
     .testamento-badge { display: inline-block; font-family: system-ui, sans-serif; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; background: #e5e0d0; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px; font-weight: 700; }
     
     .capitulo { 
-        margin-bottom: 48px; 
-        padding-bottom: 28px; 
+        margin-bottom: 52px; 
+        padding-bottom: 32px; 
         border-bottom: 2px solid var(--borde); 
         scroll-margin-top: 85px; 
     }
@@ -237,64 +232,160 @@
     .versiculo.destacado { background: var(--resalte); }
     .num { font-weight: bold; font-size: 0.78rem; color: #6b7280; vertical-align: super; margin-right: 5px; font-family: system-ui, sans-serif; }
     
-    /* Triangulito desplegable y Tarjetas de Estudio tipo X/Facebook */
-    details.estudio { margin-top: 14px; display: block; font-family: system-ui, sans-serif; }
-    summary { list-style: none; cursor: pointer; padding: 4px 8px; color: var(--accent-color); font-size: 0.95rem; user-select: none; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
-    summary::-webkit-details-marker { display: none; }
-    .triangulo { display: inline-block; transition: transform 0.2s; }
-    details[open] .triangulo { transform: rotate(90deg); }
-    .estudio-cuerpo { margin-top: 8px; padding: 16px; background: var(--panel); border: 1px solid var(--borde); border-radius: 8px; font-size: 0.95rem; line-height: 1.6; }
+    /* Pie de Capítulo Editorial (Visible al lector solo cuando hay artículos) */
+    .pie-capitulo-editorial {
+        margin-top: 26px;
+        padding: 22px;
+        background: var(--panel);
+        border: 1px solid var(--borde);
+        border-left: 4px solid var(--accent-color);
+        border-radius: 8px;
+        font-family: system-ui, sans-serif;
+    }
 
-    .post-estudio {
+    .pie-capitulo-header {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--accent-color);
+        font-weight: 700;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .articulo-estudio {
         background: var(--card-bg);
         border: 1px solid var(--borde);
         border-radius: 8px;
-        padding: 14px 16px;
+        padding: 18px 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+
+    .articulo-estudio:last-child { margin-bottom: 0; }
+
+    .articulo-titulo {
+        margin: 0 0 10px 0;
+        font-size: 1.18rem;
+        color: var(--txt);
+        font-family: Georgia, serif;
+    }
+
+    .articulo-cuerpo {
+        font-size: 0.97rem;
+        line-height: 1.7;
+        color: var(--txt);
         margin-bottom: 12px;
     }
 
-    .post-estudio:last-child { margin-bottom: 0; }
-    .post-texto { white-space: pre-wrap; margin: 0 0 10px 0; color: var(--txt); }
-    
-    .post-meta {
+    .articulo-cuerpo h4 {
+        margin: 14px 0 6px 0;
+        color: var(--accent-color);
+        font-size: 1.05rem;
+    }
+
+    .articulo-cuerpo blockquote {
+        margin: 10px 0;
+        padding: 8px 14px;
+        background: var(--bg);
+        border-left: 3px solid var(--accent-color);
+        font-style: italic;
+    }
+
+    .articulo-cuerpo ul {
+        margin: 8px 0;
+        padding-left: 22px;
+    }
+
+    .articulo-imagen {
+        max-width: 100%;
+        max-height: 420px;
+        border-radius: 6px;
+        border: 1px solid var(--borde);
+        margin: 10px 0 14px 0;
+        display: block;
+    }
+
+    .articulo-meta {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
         gap: 8px;
-        font-size: 0.82rem;
+        font-size: 0.83rem;
         color: #666;
         border-top: 1px dashed var(--borde);
-        padding-top: 8px;
+        padding-top: 10px;
     }
 
-    .post-fuente { font-style: italic; color: var(--accent-color); font-weight: 600; }
+    .articulo-fuente {
+        font-style: italic;
+        color: var(--accent-color);
+        font-weight: 600;
+    }
 
+    /* Herramientas exclusivas para los 2 editores (Ocultas al público) */
     .caja-editor {
-        margin-top: 14px;
-        padding-top: 14px;
-        border-top: 2px solid var(--borde);
+        margin-top: 18px;
+        padding: 18px;
+        background: #fff;
+        border: 2px dashed var(--accent-color);
+        border-radius: 8px;
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 10px;
+        font-family: system-ui, sans-serif;
     }
 
+    .barra-formato {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .btn-formato {
+        background: var(--panel);
+        border: 1px solid var(--borde);
+        padding: 4px 10px;
+        border-radius: 4px;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        color: var(--txt);
+    }
+
+    .btn-formato:hover {
+        background: var(--accent-color);
+        color: #fff;
+    }
+
+    .caja-editor input[type="text"],
     .caja-editor textarea {
         width: 100%;
-        min-height: 80px;
         padding: 10px;
         border: 1px solid var(--borde);
         border-radius: 6px;
         font-family: inherit;
+        font-size: 0.94rem;
         box-sizing: border-box;
-        background: #fff;
+        background: var(--bg);
     }
 
-    .caja-editor input {
-        width: 100%;
-        box-sizing: border-box;
-        background: #fff;
-        cursor: text;
+    .caja-editor textarea {
+        min-height: 110px;
+    }
+
+    .fila-imagen-editor {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        background: var(--panel);
+        padding: 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
     }
 
     .btn-publicar {
@@ -302,7 +393,7 @@
         background: var(--accent-color);
         color: #fff;
         border: none;
-        padding: 7px 15px;
+        padding: 9px 18px;
         border-radius: 6px;
         font-weight: 600;
         cursor: pointer;
@@ -312,23 +403,41 @@
         background: #fee2e2;
         color: #991b1b;
         border: 1px solid #f87171;
-        padding: 3px 8px;
+        padding: 4px 10px;
         border-radius: 4px;
         font-size: 0.78rem;
         cursor: pointer;
     }
 
-    .footer-editor {
-        margin-top: 40px;
-        text-align: center;
+    /* Pie de Página Global Editable */
+    footer.pie-global {
+        max-width: 850px;
+        margin: 0 auto 60px auto;
+        padding: 0 16px;
         font-family: system-ui, sans-serif;
+    }
+
+    .aviso-seguridad-editor {
+        background: #fef3c7;
+        border: 1px solid #f59e0b;
+        color: #92400e;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font-size: 0.83rem;
+        margin-bottom: 12px;
+        text-align: center;
+    }
+
+    .footer-acceso {
+        margin-top: 24px;
+        text-align: center;
     }
 
     .btn-acceso-editor {
         background: transparent;
         border: 1px solid var(--borde);
         color: #777;
-        padding: 6px 12px;
+        padding: 6px 14px;
         border-radius: 6px;
         font-size: 0.82rem;
         cursor: pointer;
@@ -387,11 +496,6 @@
             Texto bíblico base tomado y adaptado en formato digital de la <em>Santa Biblia Libre para el Mundo</em> (<a href="https://ebible.org/spablm/" target="_blank" rel="noopener">spablm</a>), Copyright © 2022 por Biblica, Inc. y Michael Paul Johnson, provisto por <a href="https://ebible.org" target="_blank" rel="noopener">eBible.org</a> y utilizado bajo la licencia <a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">Creative Commons Atribución-CompartirIgual 4.0 Internacional (CC BY-SA 4.0)</a>. Se ha modificado el formato original para su visualización interactiva y se han añadido espacios para notas de estudio. Las notas históricas, aclaraciones de traducción y comentarios adicionales agregados en esta edición independiente están licenciados bajo esta misma licencia [<a href="https://creativecommons.org/licenses/by-sa/4.0/deed.es" target="_blank" rel="noopener">CC BY-SA 4.0</a>]. Ni Biblica, Inc., ni Michael Paul Johnson, ni eBible.org respaldan oficialmente este sitio ni las notas de estudio aquí agregadas.
           </p>
       </div>
-
-      <!-- Botón discreto para los 2 editores autorizados -->
-      <div class="footer-editor">
-          <button id="btn-editor-login" class="btn-acceso-editor" onclick="configurarModoEditor()">🔒 Acceso Editores</button>
-      </div>
   </div>
 
   <!-- =================================================================
@@ -415,16 +519,38 @@
 </main>
 
 <!-- =================================================================
-     6. LÓGICA DEL SISTEMA: LIBROS, GUÍA, FORMSPREE Y EDITOR GITHUB
+     6. PIE DE PÁGINA GLOBAL (VISIBLE A LECTORES Y EDITABLE EN VIVO)
+     ================================================================= -->
+<footer class="pie-global">
+  <div id="contenedor-pie-global"></div>
+  <div class="footer-acceso">
+    <button id="btn-editor-login" class="btn-acceso-editor" onclick="configurarModoEditor()">🔒 Acceso Editores</button>
+  </div>
+</footer>
+
+<!-- =================================================================
+     7. LÓGICA DEL SISTEMA: LIBROS, GUÍA, SEGURIDAD VOLÁTIL Y ARTÍCULOS
      ================================================================= -->
 <script>
   const GITHUB_OWNER = "Biblia-Estudio";
   const GITHUB_REPO = "Biblia-estudio";
   const ESTUDIOS_FILE = "estudios.json";
 
+  // SEGURIDAD VOLÁTIL: El token vive únicamente en la memoria RAM de esta pestaña.
+  // Si el editor recarga, cierra la pestaña o sale de la página, se borra automáticamente.
+  let TOKEN_VOLATIL = null;
+  let AUTOR_VOLATIL = "Estudio Bíblico";
+
+  // Limpiar cualquier rastro antiguo en el navegador y destruir sesión al salir
+  localStorage.removeItem('biblia_gh_token');
+  localStorage.removeItem('biblia_gh_autor');
+  window.addEventListener('pagehide', () => { TOKEN_VOLATIL = null; });
+  window.addEventListener('beforeunload', () => { TOKEN_VOLATIL = null; });
+
   let ESTUDIOS_DB = {};
   let LIBRO_ACTUAL_DATOS = null;
   let CODIGO_LIBRO_ACTUAL = "";
+  let IMAGENES_TEMP = {};
 
   // Catálogo oficial ordenado de los 66 libros divididos por Testamento
   const CATALOGO = {
@@ -857,29 +983,33 @@
     }
   ];
 
-  // Cargar los estudios publicados desde el repositorio
+  // Cargar los estudios publicados directamente sin demora de caché para todos los lectores
   async function cargarEstudiosPublicos() {
     try {
-      const resp = await fetch(`${ESTUDIOS_FILE}?t=${Date.now()}`);
+      const rawUrl = `https://raw.githubusercontent.com/${GITHUB_OWNER}/${GITHUB_REPO}/main/${ESTUDIOS_FILE}?t=${Date.now()}`;
+      const resp = await fetch(rawUrl, { cache: "no-store" });
       if (resp.ok) {
         ESTUDIOS_DB = await resp.json();
+        return;
+      }
+      const fallback = await fetch(`${ESTUDIOS_FILE}?t=${Date.now()}`, { cache: "no-store" });
+      if (fallback.ok) {
+        ESTUDIOS_DB = await fallback.json();
       }
     } catch (e) {
       ESTUDIOS_DB = {};
     }
   }
 
-  // Verificar si el usuario actual tiene activa su llave de editor
   function esEditorActivo() {
-    return Boolean(localStorage.getItem('biblia_gh_token'));
+    return Boolean(TOKEN_VOLATIL);
   }
 
   function actualizarBotonEditor() {
     const btn = document.getElementById('btn-editor-login');
     if (!btn) return;
     if (esEditorActivo()) {
-      const autor = localStorage.getItem('biblia_gh_autor') || 'Editor';
-      btn.textContent = `🔓 Modo Editor Activo (${autor}) — Clic para salir`;
+      btn.textContent = `🔓 Modo Editor Activo (${AUTOR_VOLATIL}) — Clic para cerrar sesión`;
     } else {
       btn.textContent = `🔒 Acceso Editores`;
     }
@@ -887,10 +1017,11 @@
 
   async function configurarModoEditor() {
     if (esEditorActivo()) {
-      if (confirm("¿Deseas cerrar la sesión de Modo Editor en este navegador?")) {
-        localStorage.removeItem('biblia_gh_token');
-        localStorage.removeItem('biblia_gh_autor');
+      if (confirm("¿Deseas cerrar la sesión de Modo Editor ahora?")) {
+        TOKEN_VOLATIL = null;
+        AUTOR_VOLATIL = "Estudio Bíblico";
         actualizarBotonEditor();
+        renderizarPieGlobal();
         if (LIBRO_ACTUAL_DATOS) renderizarLibro(LIBRO_ACTUAL_DATOS);
       }
       return;
@@ -900,7 +1031,6 @@
     if (!tokenInput || !tokenInput.trim()) return;
     const token = tokenInput.trim();
 
-    // 1. Bloqueo inmediato si no tiene el formato criptográfico oficial de GitHub
     if (!token.startsWith("github_pat_") && !token.startsWith("ghp_")) {
       alert("❌ Acceso denegado: El código ingresado no es un Token válido de GitHub.");
       return;
@@ -910,7 +1040,6 @@
     if (btn) btn.textContent = "⏳ Verificando llave con GitHub...";
 
     try {
-      // 2. Comprobación directa sobre el repositorio (compatible con Tokens de Grano Fino)
       const resp = await fetch(`https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}`, {
         headers: {
           "Authorization": `Bearer ${token}`,
@@ -919,44 +1048,44 @@
         }
       });
 
-      if (!resp.ok) {
-        throw new Error("Token rechazado por GitHub");
-      }
+      if (!resp.ok) throw new Error("Token rechazado por GitHub");
 
       const repoData = await resp.json();
-      // Verificar que el token realmente tenga permiso de escritura (push) en este repositorio
       if (!repoData.permissions || !repoData.permissions.push) {
         alert("❌ Acceso denegado: Esta llave no tiene permisos de escritura en el repositorio.");
         actualizarBotonEditor();
         return;
       }
 
-      const autor = prompt("¿Qué firma deseas mostrar en tus estudios? (Ej: Estudio Bíblico):", "Estudio Bíblico");
+      const autor = prompt("¿Qué firma deseas mostrar en tus artículos? (Ej: Estudio Bíblico):", "Estudio Bíblico");
 
-      localStorage.setItem('biblia_gh_token', token);
-      localStorage.setItem('biblia_gh_autor', (autor || "Estudio Bíblico").trim());
+      TOKEN_VOLATIL = token;
+      AUTOR_VOLATIL = (autor || "Estudio Bíblico").trim();
       actualizarBotonEditor();
-      alert("✅ ¡Llave verificada con éxito! Modo Editor activado.");
+      await cargarEstudiosPublicos();
+      renderizarPieGlobal();
       if (LIBRO_ACTUAL_DATOS) renderizarLibro(LIBRO_ACTUAL_DATOS);
+      alert("✅ ¡Modo Editor activado! Por seguridad, si recargas o sales de la página tu sesión se cerrará automáticamente.");
 
     } catch (e) {
+      TOKEN_VOLATIL = null;
       alert("❌ Acceso denegado: La llave ingresada es inválida o fue revocada.");
       actualizarBotonEditor();
     }
   }
-  // Guardar en vivo en el archivo estudios.json de GitHub usando la API oficial
-  async function guardarEstudiosEnGitHub(mensajeCommit) {
-    const token = localStorage.getItem('biblia_gh_token');
-    if (!token) throw new Error("No hay sesión de editor activa.");
+
+  async function guardarEstudiosEnGitHub() {
+    if (!TOKEN_VOLATIL) throw new Error("No hay sesión de editor activa.");
 
     const apiUrl = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/contents/${ESTUDIOS_FILE}`;
     const headers = {
-      "Authorization": `Bearer ${token}`,
-      "Accept": "application/vnd.github+json"
+      "Authorization": `Bearer ${TOKEN_VOLATIL}`,
+      "Accept": "application/vnd.github+json",
+      "X-GitHub-Api-Version": "2022-11-28"
     };
 
     let shaActual = null;
-    const getResp = await fetch(`${apiUrl}?t=${Date.now()}`, { headers });
+    const getResp = await fetch(`${apiUrl}?t=${Date.now()}`, { headers, cache: "no-store" });
     if (getResp.ok) {
       const dataArchivo = await getResp.json();
       shaActual = dataArchivo.sha;
@@ -969,16 +1098,164 @@
     return { apiUrl, headers, shaActual };
   }
 
+  // Herramientas de formato para embellecer el texto del artículo
+  function insertarFormato(claveCap, inicio, fin) {
+    const area = document.getElementById(`txt-${claveCap}`);
+    if (!area) return;
+    const start = area.selectionStart;
+    const end = area.selectionEnd;
+    const seleccionado = area.value.substring(start, end) || "texto";
+    const reemplazo = `${inicio}${seleccionado}${fin}`;
+    area.value = area.value.substring(0, start) + reemplazo + area.value.substring(end);
+    area.focus();
+  }
+
+  // Compresión automática de imagen para poder subirla desde la PC o celular directo al artículo
+  function procesarImagenArchivo(claveCap, inputEl) {
+    const file = inputEl.files && inputEl.files[0];
+    if (!file) return;
+
+    const estadoEl = document.getElementById(`img-estado-${claveCap}`);
+    if (estadoEl) estadoEl.textContent = "⏳ Procesando imagen...";
+
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const img = new Image();
+      img.onload = function() {
+        const maxAncho = 800;
+        let ancho = img.width;
+        let alto = img.height;
+        if (ancho > maxAncho) {
+          alto = Math.round((alto * maxAncho) / ancho);
+          ancho = maxAncho;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = ancho;
+        canvas.height = alto;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, ancho, alto);
+        IMAGENES_TEMP[claveCap] = canvas.toDataURL('image/jpeg', 0.80);
+        if (estadoEl) estadoEl.textContent = "✅ Imagen lista para publicar";
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function escaparHTML(str) {
+    return String(str || "")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  // Convertir formato enriquecido (Negrita, Cursiva, Subtítulos, Citas, Listas) de forma segura
+  function formatearTextoEnriquecido(str) {
+    let seguro = escaparHTML(str);
+    seguro = seguro.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    seguro = seguro.replace(/\*(.+?)\*/g, '<em>$1</em>');
+
+    const lineas = seguro.split('\n');
+    let html = '';
+    let enLista = false;
+
+    lineas.forEach(linea => {
+      const limpia = linea.trim();
+      if (limpia.startsWith('### ')) {
+        if (enLista) { html += '</ul>'; enLista = false; }
+        html += `<h4>${limpia.substring(4)}</h4>`;
+      } else if (limpia.startsWith('&gt; ')) {
+        if (enLista) { html += '</ul>'; enLista = false; }
+        html += `<blockquote>${limpia.substring(5)}</blockquote>`;
+      } else if (limpia.startsWith('- ')) {
+        if (!enLista) { html += '<ul>'; enLista = true; }
+        html += `<li>${limpia.substring(2)}</li>`;
+      } else if (limpia === '') {
+        if (enLista) { html += '</ul>'; enLista = false; }
+        html += '<br>';
+      } else {
+        if (enLista) { html += '</ul>'; enLista = false; }
+        html += `<p style="margin: 6px 0;">${linea}</p>`;
+      }
+    });
+
+    if (enLista) html += '</ul>';
+    return html;
+  }
+
+  // Construir tarjeta de artículo y formulario si el editor está activo
+  function construirBloqueEditorial(claveCap, tituloSeccion) {
+    const modoEditor = esEditorActivo();
+    const listaEstudios = ESTUDIOS_DB[claveCap] || [];
+
+    // Regla estricta: si no hay artículos en este capítulo y es un lector normal, NO se muestra nada
+    if (listaEstudios.length === 0 && !modoEditor) {
+      return '';
+    }
+
+    const articulosHtml = listaEstudios.map(item => `
+      <article class="articulo-estudio">
+        ${item.titulo ? `<h3 class="articulo-titulo">${escaparHTML(item.titulo)}</h3>` : ''}
+        ${item.imagen ? `<img class="articulo-imagen" src="${escaparHTML(item.imagen)}" alt="Imagen de estudio">` : ''}
+        <div class="articulo-cuerpo">${formatearTextoEnriquecido(item.texto)}</div>
+        <div class="articulo-meta">
+          <span class="articulo-fuente">📚 Fuente: ${escaparHTML(item.fuente)}</span>
+          <span>
+            ${escaparHTML(item.autor || 'Estudio Bíblico')} • ${escaparHTML(item.fecha || '')}
+            ${modoEditor ? `<button class="btn-eliminar" onclick="eliminarEstudio('${claveCap}', ${item.id})">Eliminar</button>` : ''}
+          </span>
+        </div>
+      </article>
+    `).join('');
+
+    const editorHtml = modoEditor ? `
+      <div class="caja-editor">
+        <div class="aviso-seguridad-editor">🔒 Sesión de alta seguridad activa: si sales o recargas la página, la sesión se cerrará automáticamente.</div>
+        <strong>✍️ Publicar artículo o nota en ${escaparHTML(tituloSeccion)}</strong>
+        <input type="text" id="tit-${claveCap}" placeholder="Título del artículo o enseñanza (opcional)...">
+        <div class="barra-formato">
+          <button type="button" class="btn-formato" onclick="insertarFormato('${claveCap}', '**', '**')"><b>B</b> Negrita</button>
+          <button type="button" class="btn-formato" onclick="insertarFormato('${claveCap}', '*', '*')"><i>I</i> Cursiva</button>
+          <button type="button" class="btn-formato" onclick="insertarFormato('${claveCap}', '\n### ', '\n')">Subtítulo</button>
+          <button type="button" class="btn-formato" onclick="insertarFormato('${claveCap}', '\n> ', '\n')">❝ Cita</button>
+          <button type="button" class="btn-formato" onclick="insertarFormato('${claveCap}', '\n- ', '')">• Lista</button>
+        </div>
+        <textarea id="txt-${claveCap}" placeholder="Escribe aquí el artículo, contexto histórico o enseñanza..."></textarea>
+        <div class="fila-imagen-editor">
+          <span>🖼️ <strong>Agregar imagen (opcional):</strong></span>
+          <input type="file" accept="image/*" onchange="procesarImagenArchivo('${claveCap}', this)">
+          <span id="img-estado-${claveCap}">o pega un enlace:</span>
+          <input type="text" id="img-url-${claveCap}" placeholder="https://ejemplo.com/imagen.jpg" style="flex:1; min-width:180px;">
+        </div>
+        <input type="text" id="fnt-${claveCap}" placeholder="Fuente de donde salió la información (obligatorio)...">
+        <button id="btn-pub-${claveCap}" class="btn-publicar" onclick="publicarEstudio('${claveCap}')">Publicar artículo</button>
+      </div>
+    ` : '';
+
+    return `
+      <div class="pie-capitulo-editorial" id="pie-${claveCap}">
+        <div class="pie-capitulo-header">📖 Estudio y Notas de Pie — ${escaparHTML(tituloSeccion)}</div>
+        ${articulosHtml}
+        ${editorHtml}
+      </div>
+    `;
+  }
+
   async function publicarEstudio(claveCap) {
+    const campoTitulo = document.getElementById(`tit-${claveCap}`);
     const campoTexto = document.getElementById(`txt-${claveCap}`);
     const campoFuente = document.getElementById(`fnt-${claveCap}`);
+    const campoImgUrl = document.getElementById(`img-url-${claveCap}`);
     const btn = document.getElementById(`btn-pub-${claveCap}`);
 
-    const texto = campoTexto.value.trim();
-    const fuente = campoFuente.value.trim();
+    const titulo = campoTitulo ? campoTitulo.value.trim() : "";
+    const texto = campoTexto ? campoTexto.value.trim() : "";
+    const fuente = campoFuente ? campoFuente.value.trim() : "";
+    const imagenSubida = IMAGENES_TEMP[claveCap] || (campoImgUrl ? campoImgUrl.value.trim() : "");
 
     if (!texto || !fuente) {
-      alert("Por favor escribe el contenido del estudio y la fuente de donde salió la información.");
+      alert("Por favor escribe el contenido del artículo y la fuente de donde salió la información.");
       return;
     }
 
@@ -991,17 +1268,21 @@
       if (!ESTUDIOS_DB[claveCap]) ESTUDIOS_DB[claveCap] = [];
       ESTUDIOS_DB[claveCap].push({
         id: Date.now(),
+        titulo: titulo,
         texto: texto,
+        imagen: imagenSubida,
         fuente: fuente,
-        autor: localStorage.getItem('biblia_gh_autor') || "Editor",
+        autor: AUTOR_VOLATIL,
         fecha: new Date().toLocaleDateString('es-ES')
       });
+
+      delete IMAGENES_TEMP[claveCap];
 
       const jsonStr = JSON.stringify(ESTUDIOS_DB, null, 2);
       const base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
 
       const body = {
-        message: `Agregar estudio en ${claveCap}`,
+        message: `Publicar artículo en ${claveCap}`,
         content: base64Content
       };
       if (shaActual) body.sha = shaActual;
@@ -1012,20 +1293,19 @@
         body: JSON.stringify(body)
       });
 
-      if (!putResp.ok) throw new Error("Token inválido o sin permisos de escritura.");
+      if (!putResp.ok) throw new Error("Error al guardar en GitHub.");
 
-      renderizarLibro(LIBRO_ACTUAL_DATOS);
-      const detailsEl = document.getElementById(`det-${claveCap}`);
-      if (detailsEl) detailsEl.open = true;
+      renderizarPieGlobal();
+      if (LIBRO_ACTUAL_DATOS) renderizarLibro(LIBRO_ACTUAL_DATOS);
     } catch (err) {
-      alert("Error al publicar: verifica que tu Token de GitHub tenga permiso de escritura (Contents: Read & Write).");
+      alert("Error al publicar: verifica tu conexión o vuelve a activar tu llave de editor.");
       btn.disabled = false;
-      btn.textContent = "Publicar estudio";
+      btn.textContent = "Publicar artículo";
     }
   }
 
   async function eliminarEstudio(claveCap, idEstudio) {
-    if (!confirm("¿Seguro que deseas eliminar este estudio?")) return;
+    if (!confirm("¿Seguro que deseas eliminar este artículo?")) return;
 
     try {
       const { apiUrl, headers, shaActual } = await guardarEstudiosEnGitHub();
@@ -1042,25 +1322,24 @@
         method: "PUT",
         headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify({
-          message: `Eliminar estudio en ${claveCap}`,
+          message: `Eliminar artículo en ${claveCap}`,
           content: base64Content,
           sha: shaActual
         })
       });
 
       if (!putResp.ok) throw new Error("No se pudo eliminar.");
-      renderizarLibro(LIBRO_ACTUAL_DATOS);
+      renderizarPieGlobal();
+      if (LIBRO_ACTUAL_DATOS) renderizarLibro(LIBRO_ACTUAL_DATOS);
     } catch (e) {
-      alert("Hubo un error al intentar eliminar el estudio.");
+      alert("Hubo un error al intentar eliminar el artículo.");
     }
   }
 
-  function escaparHTML(str) {
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
+  function renderizarPieGlobal() {
+    const cont = document.getElementById('contenedor-pie-global');
+    if (!cont) return;
+    cont.innerHTML = construirBloqueEditorial('PIE_GLOBAL', 'Pie de Página General de la Plataforma');
   }
 
   function renderizarGuiaTemas(filtro = "") {
@@ -1161,7 +1440,6 @@
     const contenedor = document.getElementById('lector');
     selCap.innerHTML = '<option value="">Ir al capítulo...</option>';
     contenedor.innerHTML = `<span class="testamento-badge">${libro.testamento}</span>`;
-    const modoEditor = esEditorActivo();
 
     Object.entries(libro.capitulos).forEach(([numCap, versiculos]) => {
       selCap.innerHTML += `<option value="cap-${numCap}">Capítulo ${numCap}</option>`;
@@ -1171,49 +1449,13 @@
       ).join('');
 
       const claveCap = `${CODIGO_LIBRO_ACTUAL}-${numCap}`;
-      const listaEstudios = ESTUDIOS_DB[claveCap] || [];
-
-      const postsHtml = listaEstudios.map(item => `
-        <div class="post-estudio">
-          <p class="post-texto">${escaparHTML(item.texto)}</p>
-          <div class="post-meta">
-            <span class="post-fuente">📚 Fuente: ${escaparHTML(item.fuente)}</span>
-            <span>
-              ${escaparHTML(item.autor || '')} • ${escaparHTML(item.fecha || '')}
-              ${modoEditor ? `<button class="btn-eliminar" onclick="eliminarEstudio('${claveCap}', ${item.id})">Eliminar</button>` : ''}
-            </span>
-          </div>
-        </div>
-      `).join('');
-
-      const formularioEditorHtml = modoEditor ? `
-        <div class="caja-editor">
-          <strong>✍️ Publicar nuevo estudio en ${libro.nombre} ${numCap}</strong>
-          <textarea id="txt-${claveCap}" placeholder="Escribe aquí la enseñanza, contexto histórico o nota de estudio..."></textarea>
-          <input type="text" id="fnt-${claveCap}" placeholder="Fuente de la información (ej. Diccionario Bíblico, Flavio Josefo, Comentario Exegético...)">
-          <button id="btn-pub-${claveCap}" class="btn-publicar" onclick="publicarEstudio('${claveCap}')">Publicar estudio</button>
-        </div>
-      ` : '';
-
-      // Mostrar el triangulito si hay estudios publicados o si uno de los 2 editores tiene la sesión iniciada
-      const mostrarSeccionEstudio = listaEstudios.length > 0 || modoEditor;
+      const pieEditorialHtml = construirBloqueEditorial(claveCap, `${libro.nombre} ${numCap}`);
 
       contenedor.innerHTML += `
         <section class="capitulo" id="cap-${numCap}">
           <h2>${libro.nombre} ${numCap}</h2>
           ${versHtml}
-          ${mostrarSeccionEstudio ? `
-            <details class="estudio" id="det-${claveCap}">
-              <summary title="Estudios y notas del capítulo">
-                <span class="triangulo">▶</span>
-                <span>Notas de estudio (${listaEstudios.length})</span>
-              </summary>
-              <div class="estudio-cuerpo">
-                ${postsHtml || '<p style="margin:0; color:#666;">Aún no hay estudios publicados en este capítulo.</p>'}
-                ${formularioEditorHtml}
-              </div>
-            </details>
-          ` : ''}
+          ${pieEditorialHtml}
         </section>`;
     });
   }
@@ -1300,13 +1542,16 @@
     }
   }
 
+  // Inicializar guía y estudios al abrir la página
   renderizarGuiaTemas();
-  cargarEstudiosPublicos();
+  cargarEstudiosPublicos().then(() => {
+    renderizarPieGlobal();
+  });
   actualizarBotonEditor();
 </script>
 
 <!-- =================================================================
-     7. CONTADOR DE VISITAS ANÓNIMO Y SIN COOKIES (GOATCOUNTER)
+     8. CONTADOR DE VISITAS ANÓNIMO Y SIN COOKIES (GOATCOUNTER)
      ================================================================= -->
 <script data-goatcounter="https://biblia-estudio.goatcounter.com/count"
         async src="//gc.zgo.at/count.js"></script>
